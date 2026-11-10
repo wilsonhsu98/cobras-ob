@@ -151,12 +151,10 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .bag { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-top: 12px; }
 .bag-name { font-weight: 900; font-size: 19px; }
 .bag-items { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
-.handrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin: 14px 0; }
-.handrow .who { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
-.handrow small { display: block; font-size: 13px; color: var(--ink-2); }
-.handrow b { font-size: 19px; }
-.arrow { font-size: 22px; color: var(--ink-2); }
-.queue { font-size: 14px; color: var(--ink-2); margin-bottom: 12px; }
+.holder { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin: 14px 0; }
+.holder small { display: block; font-size: 13px; color: var(--ink-2); }
+.holder b { font-size: 19px; }
+.bag .btn + .btn { margin-top: 8px; }
 .hist { list-style: none; padding: 0; margin: 0; }
 .hist li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; font-size: 15px; }
 .hist .when { color: var(--ink-2); font-size: 13px; }

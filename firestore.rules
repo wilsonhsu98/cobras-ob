@@ -61,26 +61,29 @@ service cloud.firestore {
       allow read: if member();
     }
 
-    // ── 球具袋：兩段式交接 ──
-    // 1. 保管人發起：只能改 pending
-    // 2. 被指定的人確認：把 holderId 改成自己、輪值順序、清掉 pending
+    // ── 球具袋：一步完成的保管 ──
+    // - 任何成員都能接手：只能把 holderId 改成自己，不能指定別人
+    // - 指定任何人當保管人：只有管理者
     match /bags/{bagId} {
       allow read: if member();
       allow create, delete: if isAdmin();
       allow update: if isAdmin()
-        || (member() && me() == resource.data.holderId
-            && onlyChanged(['pending', 'updatedAt']))
-        || (member() && resource.data.pending != null
-            && resource.data.pending.toId == me()
-            && request.resource.data.holderId == me()
-            && onlyChanged(['holderId', 'queue', 'pending', 'updatedAt']));
+        || (member() && request.resource.data.holderId == me()
+            && onlyChanged(['holderId', 'updatedAt']));
     }
 
+    // 保管紀錄：建立後不可改。成員只能記錄自己接手，管理者可記錄任何人
     match /handoffs/{handoffId} {
       allow read: if member();
-      allow create: if member() && request.resource.data.fromId == me();
-      allow update: if isAdmin()
-        || (member() && (resource.data.toId == me() || resource.data.fromId == me()));
+      allow create: if isAdmin()
+        || (member() && validHandoff() && request.resource.data.toId == me()
+            && request.resource.data.byId == me());
+      allow update, delete: if false;
+    }
+
+    function validHandoff() {
+      return request.resource.data.keys().hasOnly(
+        ['bagId', 'bagName', 'fromId', 'toId', 'byId', 'missing', 'createdAt']);
     }
 
     // ── LINE 綁定表：只有 Netlify Function（Admin SDK）寫入，管理者可讀取與解除 ──

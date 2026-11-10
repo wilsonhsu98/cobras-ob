@@ -1,6 +1,6 @@
 # CobrasOB 球隊系統
 
-新北 CobrasOB 棒球隊的週末行事曆、出席回覆、簽到、點將錄與球具轉交系統。隊員從 LINE 群組點連結打開，用 LINE 身分自動登入。
+新北 CobrasOB 棒球隊的週末行事曆、出席回覆、簽到、點將錄與球具保管系統。隊員從 LINE 群組點連結打開，用 LINE 身分自動登入。
 
 技術：Vite + React（JavaScript）、Firebase（Auth + Firestore，Spark 免費方案）、LINE LIFF、Netlify（網頁與 Functions）。
 
@@ -47,7 +47,7 @@ netlify/functions/line-auth.mjs   LINE ID token → Firebase custom token（含�
 scripts/seed.mjs                  匯入球員、球具袋、範例活動
 scripts/players.sample.csv        30 位假球員（本機用）
 scripts/players.template.csv      真實名單範本（只需 name,nick,number,isAdmin）
-scripts/bags.sample.json          球具袋範本（holder/queue 用綽號對應）
+scripts/bags.sample.json          球具袋範本（holder 用綽號對應）
 firestore.rules                   權限規則
 firestore.indexes.json            出席統計需要的 collection group 索引
 src/lib/                          firebase、liff、actions（所有寫入）、constants、dates

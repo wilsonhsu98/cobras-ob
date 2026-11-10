@@ -6,7 +6,7 @@
 //
 // 雲端專案（dev 或 prod）：
 //   npm run seed:remote -- --project cobras-ob-prod --key ./service-account.json --csv ./players.csv
-//   可選：--bags ./scripts/bags.sample.json   匯入球具袋（holder/queue 用綽號對應）
+//   可選：--bags ./scripts/bags.sample.json   匯入球具袋（holder 用綽號對應）
 //         --sample-events                     匯入範例活動（只建議用在 dev 專案）
 //         --force                             players 已有資料時仍繼續匯入
 import { readFileSync } from 'node:fs';
@@ -159,9 +159,8 @@ async function main() {
     for (const b of bags) {
       const holderId = byNick.get(b.holder);
       if (!holderId) { console.warn(`  ! 找不到「${b.holder}」，略過球具袋「${b.name}」`); continue; }
-      const queue = b.queue.map((n) => byNick.get(n)).filter(Boolean);
       writer.set(db.doc(`bags/${b.id}`), {
-        name: b.name, items: b.items, holderId, queue, pending: null, updatedAt: FieldValue.serverTimestamp(),
+        name: b.name, items: b.items, holderId, updatedAt: FieldValue.serverTimestamp(),
       });
     }
     console.log(`✓ 球具袋 ${bags.length} 個`);

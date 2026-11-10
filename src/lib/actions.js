@@ -1,6 +1,6 @@
 // 所有寫入 Firestore 的動作集中在這裡
 import {
-  addDoc, collection, deleteDoc, doc, getDocs, query, serverTimestamp,
+  addDoc, collection, deleteDoc, doc, getDocs, query, runTransaction, serverTimestamp,
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -77,33 +77,19 @@ export async function unbindPlayer(playerId) {
 
 export const deletePlayer = (playerId) => deleteDoc(doc(db, COL.players, playerId));
 
-// ── 球具交接（兩段式）──
-export async function startHandoff(bag, fromId, toId, missing) {
-  const batch = writeBatch(db);
-  const ref = doc(collection(db, COL.handoffs));
-  batch.set(ref, {
-    bagId: bag.id, bagName: bag.name, fromId, toId, missing,
-    createdAt: serverTimestamp(), confirmedAt: null, canceled: false,
+// ── 球具保管（一步完成）──
+// 接手：toId === byId === 自己。指定別人：byId 是管理者（rules 擋掉一般成員）。
+// 用 transaction 讀最新的保管人當 fromId，同時接手時紀錄才不會錯。
+export function setBagHolder(bagId, toId, byId, missing = '') {
+  const bagRef = doc(db, COL.bags, bagId);
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(bagRef);
+    if (!snap.exists()) throw new Error(`bag ${bagId} not found`);
+    const { name, holderId } = snap.data();
+    if (holderId === toId) return;
+    tx.update(bagRef, { holderId: toId, updatedAt: serverTimestamp() });
+    tx.set(doc(collection(db, COL.handoffs)), {
+      bagId, bagName: name, fromId: holderId ?? null, toId, byId, missing, createdAt: serverTimestamp(),
+    });
   });
-  batch.update(doc(db, COL.bags, bag.id), {
-    pending: { handoffId: ref.id, fromId, toId, missing }, updatedAt: serverTimestamp(),
-  });
-  await batch.commit();
-}
-
-export async function confirmHandoff(bag, me) {
-  const { handoffId, fromId } = bag.pending;
-  const queue = (bag.queue || []).filter((id) => id !== me);
-  if (fromId && fromId !== me) queue.push(fromId);
-  const batch = writeBatch(db);
-  batch.update(doc(db, COL.handoffs, handoffId), { confirmedAt: serverTimestamp() });
-  batch.update(doc(db, COL.bags, bag.id), { holderId: me, queue, pending: null, updatedAt: serverTimestamp() });
-  await batch.commit();
-}
-
-export async function cancelHandoff(bag) {
-  const batch = writeBatch(db);
-  batch.update(doc(db, COL.handoffs, bag.pending.handoffId), { canceled: true });
-  batch.update(doc(db, COL.bags, bag.id), { pending: null, updatedAt: serverTimestamp() });
-  await batch.commit();
 }

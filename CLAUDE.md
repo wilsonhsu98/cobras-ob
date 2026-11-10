@@ -40,8 +40,8 @@ events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
 events/{eventId}/attendance/{playerId}
                               playerId, eventId, rsvp(yes|maybe|no|null),
                               checkedIn, checkedInAt, updatedAt
-bags/{bagId}                  name, items[{name,qty}], holderId, queue[], pending{handoffId,fromId,toId,missing}|null
-handoffs/{handoffId}          bagId, bagName, fromId, toId, missing, createdAt, confirmedAt, canceled
+bags/{bagId}                  name, items[{name,qty}], holderId
+handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, createdAt   （保管紀錄，建立後不可改）
 lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function 寫入，管理者可讀、可刪）
 ```
 
@@ -56,7 +56,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 已通過 LINE 驗證但尚未綁定的人只能讀 `players`（用來選自己）。
 - 球員只能改自己的出席紀錄、自己的球員卡（不能改 `isAdmin`、`bound`）。
 - 簽到（`checkedIn` 變動）只能在活動當天，rules 用 `request.time + 8h` 對 `dateKey` 比對。
-- 球具交接是兩段式：保管人只能改 `pending`；被指定的人才能把 `holderId` 改成自己並輪轉 `queue`。
+- 球具保管一步完成、沒有輪值：任何成員都能接手（只能把 `holderId` 改成自己，不需原保管人同意）；指定別人保管只有管理者。每次換手寫一筆 `handoffs`（`byId` 不等於 `toId` 代表是管理者指定）。
 - 改 rules 時請在 Emulator 實際操作驗證。
 
 ## 設計規範
@@ -87,7 +87,7 @@ npm run build       # 正式建置
 ## 待辦（依優先順序）
 
 1. 實際串接 LINE（dev 專案 + 測試用 LIFF）並驗證綁定流程
-2. 管理頁：球具袋管理（新增袋子、調整輪值順序、指定保管人）
+2. 管理頁：球具袋管理（新增、刪除袋子、編輯內容物；指定保管人已在球具頁完成）
 3. 管理頁：編輯單場活動內容（目前只能改雨天狀態或刪除）
 4. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
 5. 尾牙功能：年度出席統計頁、獎項名單
