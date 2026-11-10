@@ -19,6 +19,8 @@ export const EVENT_TYPE_LABEL = {
   practice: '練球', hardball: '硬式比賽', rubberball: '軟式比賽', softball: '壘球比賽', party: '聚會',
 };
 
+export const JERSEYS = ['練習衣', '條紋衣'];
+
 export const EVENT_STATUS = { on: 'on', rain: 'rain' };
 
 export const POSITIONS = ['投手', '捕手', '一壘', '二壘', '三壘', '游擊', '左外野', '中外野', '右外野', '指定打擊'];

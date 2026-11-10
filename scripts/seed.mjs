@@ -99,11 +99,11 @@ function sampleEvents() {
   const lastSun = addDays(today, -(today.getDay() || 7));
   const practice = (d, title = '週日練球') => ({
     date: toISO(d), start: '14:00', end: '17:00', type: 'practice', title,
-    place: '社區國小棒球場', opponent: '', jersey: '練習服',
+    place: '社區國小棒球場', opponent: '', jersey: '練習衣',
   });
   const game = (d, opponent, place, type = 'hardball') => ({
     date: toISO(d), start: '09:00', end: '12:00', type, title: '友誼賽',
-    place, opponent, jersey: '白色主場球衣',
+    place, opponent, jersey: '條紋衣',
   });
   const list = [
     practice(addDays(lastSun, -14)),

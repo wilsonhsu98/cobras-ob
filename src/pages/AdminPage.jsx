@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { EVENT_TYPE, EVENT_TYPE_LABEL } from '../lib/constants';
+import { EVENT_TYPE, EVENT_TYPE_LABEL, JERSEYS } from '../lib/constants';
 import { dowShort, isPastEvent, isWeekend, md } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
@@ -40,7 +40,7 @@ function NewEventForm() {
   const run = useRunner();
   const [f, setF] = useState({
     type: EVENT_TYPE.practice, date: '', title: '週日練球', start: '14:00', end: '17:00',
-    place: '社區國小棒球場', opponent: '', jersey: '練習服', repeat: false,
+    place: '社區國小棒球場', opponent: '', jersey: JERSEYS[0], repeat: false,
   });
   const [err, setErr] = useState('');
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
@@ -77,7 +77,12 @@ function NewEventForm() {
         <div className="field"><label htmlFor="ne-place">地點</label><input id="ne-place" value={f.place} onChange={set('place')} /></div>
         <div className="row2">
           <div className="field"><label htmlFor="ne-opp">對手（比賽才填）</label><input id="ne-opp" value={f.opponent} onChange={set('opponent')} /></div>
-          <div className="field"><label htmlFor="ne-jersey">服裝</label><input id="ne-jersey" value={f.jersey} onChange={set('jersey')} /></div>
+          <div className="field">
+            <label htmlFor="ne-jersey">服裝</label>
+            <select id="ne-jersey" value={f.jersey} onChange={set('jersey')}>
+              {JERSEYS.map((j) => <option key={j} value={j}>{j}</option>)}
+            </select>
+          </div>
         </div>
         <label className="check"><input type="checkbox" checked={f.repeat} onChange={set('repeat')} /> 每週同一天重複，共 4 週</label>
         {err && <div className="err">{err}</div>}
