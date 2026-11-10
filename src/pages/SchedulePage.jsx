@@ -6,10 +6,22 @@ import EventRow from '../components/EventRow';
 import EventSheet from '../components/EventSheet';
 import WeekendCalendar from '../components/WeekendCalendar';
 
+const VIEW_KEY = 'cobras:scheduleView';
+
+// 記住上次選的顯示方式；localStorage 被擋（私密模式等）時就用預設的清單
+function readView() {
+  try { return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list'; } catch { return 'list'; }
+}
+
 export default function SchedulePage() {
   const { events, myAttendance } = useTeamData();
-  const [view, setView] = useState('list');
+  const [view, setView] = useState(readView);
   const [openId, setOpenId] = useState(null);
+
+  function changeView(v) {
+    setView(v);
+    try { localStorage.setItem(VIEW_KEY, v); } catch { /* ignore */ }
+  }
 
   const upcoming = events.filter((e) => !isPastEvent(e));
   const past = events.filter(isPastEvent).reverse();
@@ -23,8 +35,8 @@ export default function SchedulePage() {
         : <div className="notice">目前沒有安排活動。管理者可以到「管理」新增。</div>}
 
       <div className="seg" role="group" aria-label="顯示方式">
-        <button aria-pressed={view === 'list'} onClick={() => setView('list')}>清單</button>
-        <button aria-pressed={view === 'grid'} onClick={() => setView('grid')}>週末月曆</button>
+        <button aria-pressed={view === 'list'} onClick={() => changeView('list')}>清單</button>
+        <button aria-pressed={view === 'grid'} onClick={() => changeView('grid')}>週末月曆</button>
       </div>
 
       {view === 'list' ? (
