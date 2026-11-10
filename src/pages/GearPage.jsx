@@ -36,7 +36,7 @@ export default function GearPage() {
               <div className="bag-name">{b.name}</div>
               <div className="bag-items">{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}</div>
             </div>
-            {photos.get(b.id) && <img className="bag-pic" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
+            {photos.get(b.id) && <img className="bag-thumb" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
           </div>
           <div className="holder">
             <div><small>目前保管</small><b>{nickOf(b.holderId)}</b></div>

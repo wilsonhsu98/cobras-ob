@@ -154,9 +154,10 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .bag-head > div { min-width: 0; }
 .bag-name { font-weight: 900; font-size: 19px; }
 .bag-items { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
-/* 球具照片（方形圓角）與保管人頭像（圓形）：同一個大小，都在右邊 */
-.bag-pic, .holder .avatar { width: var(--pic); height: var(--pic); flex: none; }
-.bag-pic { display: block; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+/* 球具照片（方形圓角）與保管人頭像（圓形）：同一個大小，都在右邊。
+   球具頁與管理頁共用 .bag-thumb，圓角才會一致 */
+.bag-thumb { display: block; width: var(--pic, 56px); height: var(--pic, 56px); flex: none; object-fit: cover; border-radius: 10px; background: var(--surface-2); }
+.holder .avatar { width: var(--pic); height: var(--pic); flex: none; }
 .holder { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin: 14px 0; }
 .holder .avatar { position: static; border: 0; font-size: calc(var(--pic) * .42); }
 .holder small { display: block; font-size: 13px; color: var(--ink-2); }
@@ -164,7 +165,6 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .bag .btn + .btn { margin-top: 8px; }
 .bag-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
 .bag-photo.empty { display: grid; place-items: center; font-size: 14px; color: var(--ink-2); border: 1px dashed var(--line); }
-.bag-thumb { width: 56px; height: 56px; flex: none; object-fit: cover; border-radius: 10px; }
 .item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .item-row .nm { flex: 1; min-width: 0; }
 .item-row .qty { width: 76px; flex: none; }
