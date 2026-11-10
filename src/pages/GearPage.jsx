@@ -40,19 +40,22 @@ export default function GearPage() {
         </div>
       ))}
 
-      <h3 className="sec">保管紀錄</h3>
-      <ul className="hist">
-        {history.map((h) => (
-          <li key={h.id}>
-            <div className="when">{shortDate(h.createdAt)}　{h.bagName}</div>
-            {h.byId === h.toId
-              ? `${nickOf(h.toId)} 接手（原保管：${nickOf(h.fromId)}）`
-              : `${nickOf(h.byId)} 指定 ${nickOf(h.toId)} 接手（原保管：${nickOf(h.fromId)}）`}
-            {h.missing && <div className="miss">短少：{h.missing}</div>}
-          </li>
-        ))}
-        {history.length === 0 && <li>還沒有保管紀錄。</li>}
-      </ul>
+      {history.length > 0 && (
+        <>
+          <h3 className="sec">保管紀錄</h3>
+          <ul className="hist">
+            {history.map((h) => (
+              <li key={h.id}>
+                <div className="when">{shortDate(h.createdAt)}　{h.bagName}</div>
+                {h.byId === h.toId
+                  ? `${nickOf(h.toId)} 接手（原保管：${nickOf(h.fromId)}）`
+                  : `${nickOf(h.byId)} 指定 ${nickOf(h.toId)} 接手（原保管：${nickOf(h.fromId)}）`}
+                {h.missing && <div className="miss">短少：{h.missing}</div>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       {sheet && <TakeoverSheet bag={sheet.bag} assign={sheet.assign} onClose={() => setSheet(null)} />}
     </>
