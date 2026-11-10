@@ -30,7 +30,7 @@ export default function GearPage() {
         : <div className="notice">你目前沒有保管球具。</div>}
 
       {bags.map((b) => (
-        <div className="bag" key={b.id}>
+        <div className={`bag${b.holderId === me?.id ? ' mine' : ''}`} key={b.id}>
           <div className="bag-head">
             <div>
               <div className="bag-name">{b.name}</div>

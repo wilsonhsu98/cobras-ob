@@ -150,6 +150,9 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .notice { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; font-size: 15px; color: var(--ink-2); margin-bottom: 10px; }
 .notice.mine { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
 .bag { --pic: 56px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-top: 12px; }
+/* 自己保管的球具：跟上方「你目前保管」提示（.notice.mine）同樣的橘框與底色；邊框加粗 1px，內距少 1px 避免版面位移 */
+.bag.mine { border: 2px solid var(--accent); background: var(--accent-soft); padding: 15px; }
+.bag.mine .holder { background: color-mix(in srgb, var(--surface) 55%, transparent); }
 .bag-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-right: 12px; } /* 與 .holder 的左右內距一致，兩個圓才會對齊 */
 .bag-head > div { min-width: 0; }
 .bag-name { font-weight: 900; font-size: 19px; }
