@@ -1,3 +1,8 @@
+import { isPastEvent } from './dates';
+
+// 已舉辦的活動：日期已過、且沒有因雨取消。出席統計以「會到」的回覆除以這個數字
+export const heldEvents = (events) => events.filter((e) => isPastEvent(e) && e.status !== 'rain');
+
 export function countRsvp(attendance, totalPlayers) {
   let yes = 0, maybe = 0, no = 0;
   for (const a of attendance) {

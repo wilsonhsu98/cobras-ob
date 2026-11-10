@@ -9,7 +9,8 @@ import {
 } from '../lib/actions';
 import { useAuth } from '../hooks/useAuth';
 import { useBagPhotos } from '../hooks/useBagPhotos';
-import { useAllCheckins, useEventAttendance } from '../hooks/useEventAttendance';
+import { heldEvents } from '../lib/stats';
+import { useAllRsvpYes, useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
 import BagSheet from '../components/BagSheet';
@@ -268,18 +269,19 @@ function PlayerAdmin() {
 
 function AttendanceRanking() {
   const { events, players } = useTeamData();
-  const { data: checkins } = useAllCheckins();
-  const pastIds = new Set(events.filter(isPastEvent).map((e) => e.id));
-  const total = pastIds.size;
+  const { data: yes } = useAllRsvpYes();
+  const heldIds = new Set(heldEvents(events).map((e) => e.id));
+  const total = heldIds.size;
   const counts = new Map();
-  for (const c of checkins) if (pastIds.has(c.eventId)) counts.set(c.playerId, (counts.get(c.playerId) || 0) + 1);
+  for (const a of yes) if (heldIds.has(a.eventId)) counts.set(a.playerId, (counts.get(a.playerId) || 0) + 1);
   const ranks = players.map((p) => ({ p, n: counts.get(p.id) || 0 })).sort((a, b) => b.n - a.n).slice(0, 10);
 
   return (
     <>
-      <h3 className="sec">出席排行（尾牙全勤獎參考）</h3>
+      <h3 className="sec">出席排行（會到／舉辦活動數）</h3>
       <div className="card">
-        {total === 0 && <div className="hint">還沒有已結束的活動。</div>}
+        {total === 0 && <div className="hint">還沒有已舉辦的活動。</div>}
+        {total > 0 && <div className="hint" style={{ marginBottom: 8 }}>以回覆「會到」計算，因雨取消的活動不算。尾牙全勤獎參考。</div>}
         {total > 0 && ranks.map((r, i) => (
           <div className="rank" key={r.p.id}>
             <span className="num">{i + 1}</span>

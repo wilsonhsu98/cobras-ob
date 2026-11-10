@@ -18,7 +18,7 @@ export default function EventRow({ event, myRsvp, past, onOpen }) {
         <div className="ev-meta">{event.start}–{event.end}　{event.place}</div>
       </div>
       {past
-        ? <span className="pill">{myRsvp?.checkedIn ? '有簽到' : '—'}</span>
+        ? <span className="pill">{myRsvp?.rsvp === 'yes' ? RSVP_LABEL.yes : '—'}</span>
         : <span className={`pill ${myRsvp?.rsvp || ''}`}>{myRsvp?.rsvp ? RSVP_LABEL[myRsvp.rsvp] : '未回覆'}</span>}
     </button>
   );

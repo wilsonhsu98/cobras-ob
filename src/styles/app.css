@@ -107,6 +107,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 /* ── weekend calendar ── */
 .mnav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .mnav b { font-size: 19px; }
+.mnav button:disabled { opacity: .3; }
 .mnav button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 20px; }
 .wk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .wk-head { font-size: 14px; font-weight: 700; color: var(--ink-2); text-align: center; }
@@ -220,9 +221,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .cover span.lack { background: var(--danger-soft); color: var(--danger); }
 .names { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
 .names span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 15px; }
-.names span.in { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
 .grp { font-weight: 700; font-size: 15px; color: var(--ink-2); }
-.checkin { margin: 14px 0 4px; }
 
 /* ── tab bar ── */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }

@@ -2,22 +2,33 @@ import { useState } from 'react';
 import { EVENT_TYPE_LABEL } from '../lib/constants';
 import { addDays, parseISO, toISO, todayISO } from '../lib/dates';
 
+// 這個月出現的週末（週六、週日）。已經過去的週不顯示（週日早於今天就算過去）
+function weekendRows(y, m, today) {
+  const last = new Date(y, m + 1, 0);
+  const rows = [];
+  let sat = new Date(y, m, 1 - ((new Date(y, m, 1).getDay() + 1) % 7));
+  while (sat <= last) {
+    const sun = addDays(sat, 1);
+    if (toISO(sun) >= today) rows.push([sat, sun]);
+    sat = addDays(sat, 7);
+  }
+  return rows;
+}
+
 export default function WeekendCalendar({ events, onOpen }) {
+  const today = todayISO();
   const [month, setMonth] = useState(() => {
-    const t = parseISO(todayISO());
-    return new Date(t.getFullYear(), t.getMonth(), 1);
+    const t = parseISO(today);
+    const thisMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+    // 這個月的週末都過完了（例如月底的週一），直接從下個月開始
+    return weekendRows(thisMonth.getFullYear(), thisMonth.getMonth(), today).length
+      ? thisMonth
+      : new Date(t.getFullYear(), t.getMonth() + 1, 1);
   });
   const y = month.getFullYear();
   const m = month.getMonth();
-  const last = new Date(y, m + 1, 0);
-  const today = todayISO();
-
-  const rows = [];
-  let sat = new Date(y, m, 1 - ((month.getDay() + 1) % 7));
-  while (sat <= last) {
-    rows.push([sat, addDays(sat, 1)]);
-    sat = addDays(sat, 7);
-  }
+  const rows = weekendRows(y, m, today);
+  const canGoPrev = weekendRows(y, m - 1, today).length > 0;
 
   const Cell = ({ d }) => {
     const key = toISO(d);
@@ -40,7 +51,7 @@ export default function WeekendCalendar({ events, onOpen }) {
   return (
     <>
       <div className="mnav">
-        <button onClick={() => setMonth(new Date(y, m - 1, 1))} aria-label="上個月">‹</button>
+        <button onClick={() => setMonth(new Date(y, m - 1, 1))} disabled={!canGoPrev} aria-label="上個月">‹</button>
         <b>{y} 年 {m + 1} 月</b>
         <button onClick={() => setMonth(new Date(y, m + 1, 1))} aria-label="下個月">›</button>
       </div>
@@ -48,6 +59,7 @@ export default function WeekendCalendar({ events, onOpen }) {
       {rows.map(([s, u]) => (
         <div className="wk" key={toISO(s)}><Cell d={s} /><Cell d={u} /></div>
       ))}
+      {rows.length === 0 && <div className="notice">這個月沒有尚未過去的週末。</div>}
     </>
   );
 }

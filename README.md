@@ -1,6 +1,6 @@
 # CobrasOB 球隊系統
 
-新北 CobrasOB 棒球隊的週末行事曆、出席回覆、簽到、點將錄與球具保管系統。隊員從 LINE 群組點連結打開，用 LINE 身分自動登入。
+新北 CobrasOB 棒球隊的週末行事曆、出席回覆、點將錄與球具保管系統。隊員從 LINE 群組點連結打開，用 LINE 身分自動登入。
 
 技術：Vite + React（JavaScript）、Firebase（Auth + Firestore，Spark 免費方案）、LINE LIFF、Netlify（網頁與 Functions）。
 
@@ -32,7 +32,6 @@ npm run dev
 打開 http://localhost:5173 ，從名單選一位球員即可登入。有管理職的人（宏哥＝隊長、阿明＝副隊長、雄哥＝總務、翰叔與霖霖＝教練）是管理者，可以看到「管理」分頁；選其他人可以體驗一般隊員的畫面。右上角「切換」可以換人。
 
 - Emulator 管理介面：http://localhost:4000 （可以直接看、改 Firestore 資料）
-- 假資料會自動建立一場「今天」的活動，方便測試當天簽到
 - 想保留測試資料：改用 `npm run emulators:keep`，關閉時會存到 `emulator-data/`（第一次使用前先 `mkdir emulator-data`）
 - 想用手機連電腦測試：在 `firebase.json` 的 auth 與 firestore 加上 `"host": "0.0.0.0"`，手機連 `http://電腦的區網IP:5173`
 
@@ -135,8 +134,6 @@ npm run seed:remote -- --project cobras-ob-prod --key ./service-account.json --c
 **有人綁錯球員？** 管理頁 → 球員管理 → 解除綁定，對方重新打開就能重選。
 
 **登入一直失敗？** 檢查 `LINE_CHANNEL_ID` 是否和 LIFF app 所屬的 channel 一致，以及 LINE Login channel 是否已 Published。Netlify 的 Functions log 可以看到詳細錯誤。
-
-**簽到按鈕沒出現？** 只有活動當天（台北時間）且非雨天取消才會出現，Firestore rules 也會擋下非當天的簽到。
 
 ---
 

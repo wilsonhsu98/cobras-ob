@@ -12,7 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { ADMIN_ROLES } from '../src/lib/constants.js';
 
 const args = process.argv.slice(2);
@@ -78,6 +78,8 @@ function toPlayer(row) {
     // 有管理職（隊長、副隊長、總務、教練）就是管理者；isAdmin 欄位仍可單獨指定
     isAdmin: ADMIN_ROLES.includes(role) || String(row.isAdmin).toLowerCase() === 'true',
     role,
+    job: row.job || '',
+    favoriteTeam: row.favoriteTeam || '',
     positions: row.positions ? row.positions.split(/[\/、]/).map((s) => s.trim()).filter(Boolean) : [],
     batsThrows: row.batsThrows || '',
     kid: row.kid || '',
@@ -158,10 +160,6 @@ function sampleEvents() {
     }
     list.push(practice(sun));
   }
-  // 讓今天一定有一場，方便測試「當天簽到」
-  if (!list.some((e) => e.date === toISO(today))) {
-    list.push({ ...practice(today, '今日測試活動（Emulator 限定）'), start: '19:00', end: '21:00' });
-  }
   return list.map((e) => ({ ...e, dateKey: dateKey(e.date), status: 'on', seriesId: null }));
 }
 
@@ -238,10 +236,12 @@ async function main() {
         const r = Math.random();
         let data = null;
         if (past && r < 0.64) {
-          data = { rsvp: 'yes', checkedIn: true, checkedInAt: Timestamp.fromDate(parseISO(ev.date)) };
+          data = { rsvp: 'yes' };
+        } else if (past && r < 0.74) {
+          data = { rsvp: 'no' };
         } else if (!past && r < 0.7) {
           const k = Math.random();
-          data = { rsvp: k < 0.6 ? 'yes' : k < 0.8 ? 'maybe' : 'no', checkedIn: false, checkedInAt: null };
+          data = { rsvp: k < 0.6 ? 'yes' : k < 0.8 ? 'maybe' : 'no' };
         }
         if (data) {
           writer.set(db.doc(`events/${eventId}/attendance/${p.id}`), {

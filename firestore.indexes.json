@@ -5,7 +5,7 @@
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "playerId", "order": "ASCENDING" },
-        { "fieldPath": "checkedIn", "order": "ASCENDING" }
+        { "fieldPath": "rsvp", "order": "ASCENDING" }
       ]
     }
   ],
@@ -20,7 +20,7 @@
     },
     {
       "collectionGroup": "attendance",
-      "fieldPath": "checkedIn",
+      "fieldPath": "rsvp",
       "indexes": [
         { "order": "ASCENDING", "queryScope": "COLLECTION" },
         { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }

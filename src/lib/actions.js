@@ -16,17 +16,6 @@ export function setRsvp(eventId, playerId, rsvp) {
   }, { merge: true });
 }
 
-export function setCheckin(eventId, playerId, on, currentRsvp) {
-  const data = {
-    playerId, eventId,
-    checkedIn: on,
-    checkedInAt: on ? serverTimestamp() : null,
-    updatedAt: serverTimestamp(),
-  };
-  if (on && currentRsvp !== 'yes') data.rsvp = 'yes';
-  return setDoc(attendanceRef(eventId, playerId), data, { merge: true });
-}
-
 // ── 活動（管理者）──
 export async function createEvents(base, repeatWeeks = 1) {
   const seriesId = repeatWeeks > 1 ? crypto.randomUUID() : null;
@@ -60,7 +49,7 @@ export const updateMyProfile = (playerId, data) =>
 export const addPlayer = ({ name, nick, number }) =>
   addDoc(collection(db, COL.players), {
     name, nick: nick || name, number: number === '' || number == null ? null : Number(number),
-    isAdmin: false, role: '', positions: [], batsThrows: '', kid: '', experience: '', skill: '',
+    isAdmin: false, role: '', positions: [], batsThrows: '', kid: '', experience: '', skill: '', job: '', favoriteTeam: '',
     bound: false, createdAt: serverTimestamp(),
   });
 

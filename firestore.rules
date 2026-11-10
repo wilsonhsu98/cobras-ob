@@ -13,12 +13,6 @@ service cloud.firestore {
     function onlyChanged(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
-    // 台北時間的今天，格式同 events.dateKey（例如 20261115）
-    function taipeiDateKey() {
-      let t = request.time + duration.value(8, 'h');
-      return t.year() * 10000 + t.month() * 100 + t.day();
-    }
-
     // ── 球員 ──
     // 尚未綁定的人（已通過 LINE 驗證）也能讀名單，才能從名單選自己
     match /players/{playerId} {
@@ -27,7 +21,7 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (member() && me() == playerId
             && onlyChanged(['nick', 'number', 'positions', 'batsThrows', 'kid',
-                            'experience', 'skill', 'updatedAt']));
+                            'experience', 'skill', 'job', 'favoriteTeam', 'updatedAt']));
     }
 
     // ── 活動與出席 ──
@@ -43,17 +37,13 @@ service cloud.firestore {
       }
     }
 
+    // 出席只記錄回覆（會到／未定／不會到），不做當日簽到
     function validAttendance(eventId, playerId) {
       let d = request.resource.data;
-      let before = resource == null ? {} : resource.data;
-      let ev = get(/databases/$(database)/documents/events/$(eventId)).data;
-      let checkinChanged = d.get('checkedIn', false) != before.get('checkedIn', false);
       return d.playerId == playerId
         && d.eventId == eventId
-        && d.keys().hasOnly(['playerId', 'eventId', 'rsvp', 'checkedIn', 'checkedInAt', 'updatedAt'])
-        && (d.get('rsvp', null) == null || d.rsvp in ['yes', 'maybe', 'no'])
-        // 簽到只能在活動當天（台北時間）
-        && (!checkinChanged || ev.dateKey == taipeiDateKey());
+        && d.keys().hasOnly(['playerId', 'eventId', 'rsvp', 'updatedAt'])
+        && (d.get('rsvp', null) == null || d.rsvp in ['yes', 'maybe', 'no']);
     }
 
     // 出席統計用的 collectionGroup 查詢

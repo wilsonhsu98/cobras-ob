@@ -10,18 +10,18 @@ export function useEventAttendance(eventId) {
   );
 }
 
-/** 所有簽到紀錄（出席排行用）。資料量會隨時間成長，只在需要的頁面使用。 */
-export function useAllCheckins(enabled = true) {
+/** 所有回覆「會到」的紀錄（出席排行用）。資料量會隨時間成長，只在需要的頁面使用。 */
+export function useAllRsvpYes(enabled = true) {
   return useQuery(
-    () => (enabled ? query(collectionGroup(db, COL.attendance), where('checkedIn', '==', true)) : null),
+    () => (enabled ? query(collectionGroup(db, COL.attendance), where('rsvp', '==', 'yes')) : null),
     [enabled]
   );
 }
 
-export function usePlayerCheckins(playerId) {
+export function usePlayerRsvpYes(playerId) {
   return useQuery(
     () => (playerId
-      ? query(collectionGroup(db, COL.attendance), where('playerId', '==', playerId), where('checkedIn', '==', true))
+      ? query(collectionGroup(db, COL.attendance), where('playerId', '==', playerId), where('rsvp', '==', 'yes'))
       : null),
     [playerId]
   );

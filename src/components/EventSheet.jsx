@@ -1,10 +1,8 @@
 import { EVENT_TYPE_LABEL, MIN_PLAYERS, RSVP_LABEL } from '../lib/constants';
-import { dowLabel, isPastEvent, md, todayISO } from '../lib/dates';
+import { dowLabel, isPastEvent, md } from '../lib/dates';
 import { countRsvp, coverage } from '../lib/stats';
-import { setCheckin } from '../lib/actions';
 import { useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
-import { useToast } from '../hooks/useToast';
 import RsvpButtons from './RsvpButtons';
 import Sheet from './Sheet';
 
@@ -12,29 +10,17 @@ const mapUrl = (place) => `https://www.google.com/maps/search/?api=1&query=${enc
 
 export default function EventSheet({ eventId, onClose }) {
   const { events, players, me } = useTeamData();
-  const toast = useToast();
   const event = events.find((e) => e.id === eventId);
   const { data: attendance } = useEventAttendance(eventId);
   if (!event) return null;
 
   const past = isPastEvent(event);
   const rain = event.status === 'rain';
-  const isToday = event.date === todayISO();
   const byPlayer = new Map(attendance.map((a) => [a.playerId, a]));
   const mine = me ? byPlayer.get(me.id) : null;
   const c = countRsvp(attendance, players.length);
   const cv = coverage(attendance, players);
-
-  async function toggleCheckin() {
-    const on = !mine?.checkedIn;
-    try {
-      await setCheckin(event.id, me.id, on, mine?.rsvp);
-      toast(on ? '簽到成功，打球愉快！' : '已取消簽到');
-    } catch (e) {
-      console.error(e);
-      toast('簽到失敗，只有活動當天可以簽到');
-    }
-  }
+  const yesList = players.filter((p) => byPlayer.get(p.id)?.rsvp === 'yes');
 
   const head = (
     <>
@@ -45,10 +31,7 @@ export default function EventSheet({ eventId, onClose }) {
 
   const Names = ({ list, empty = '—' }) => (
     <div className="names">
-      {list.length ? list.map((p) => {
-        const a = byPlayer.get(p.id);
-        return <span key={p.id} className={a?.checkedIn ? 'in' : ''}>{p.nick}{a?.checkedIn ? ' ✓' : ''}</span>;
-      }) : <span>{empty}</span>}
+      {list.length ? list.map((p) => <span key={p.id}>{p.nick}</span>) : <span>{empty}</span>}
     </div>
   );
 
@@ -66,8 +49,8 @@ export default function EventSheet({ eventId, onClose }) {
 
       {past ? (
         <>
-          <h3 className="sec">當天簽到（{attendance.filter((a) => a.checkedIn).length} 人）</h3>
-          <Names list={players.filter((p) => byPlayer.get(p.id)?.checkedIn)} empty="沒有簽到紀錄" />
+          <h3 className="sec">會到（{yesList.length} 人）</h3>
+          <Names list={yesList} empty="沒有人回覆會到" />
         </>
       ) : (
         <>
@@ -76,13 +59,6 @@ export default function EventSheet({ eventId, onClose }) {
               <h3 className="sec">你會出席嗎？</h3>
               <RsvpButtons eventId={event.id} playerId={me.id} current={mine?.rsvp} disabled={rain} />
             </>
-          )}
-          {me && isToday && !rain && (
-            <div className="checkin">
-              <button className={`btn ${mine?.checkedIn ? 'ghost' : ''}`} onClick={toggleCheckin}>
-                {mine?.checkedIn ? '已簽到，點一下取消' : '我到球場了，簽到'}
-              </button>
-            </div>
           )}
 
           <h3 className="sec">出席名單</h3>

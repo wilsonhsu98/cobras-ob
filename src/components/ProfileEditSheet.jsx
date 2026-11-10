@@ -14,6 +14,8 @@ export default function ProfileEditSheet({ onClose }) {
     positions: me.positions || [],
     batsThrows: me.batsThrows || '',
     experience: me.experience || '',
+    job: me.job || '',
+    favoriteTeam: me.favoriteTeam || '',
     kid: me.kid || '',
     skill: me.skill || '',
   }));
@@ -34,6 +36,8 @@ export default function ProfileEditSheet({ onClose }) {
         number: n === '' ? null : Number(n),
         kid: form.kid.trim(),
         skill: form.skill.trim(),
+        job: form.job.trim(),
+        favoriteTeam: form.favoriteTeam.trim(),
       });
       toast('球員卡已更新');
       onClose();
@@ -74,6 +78,16 @@ export default function ProfileEditSheet({ onClose }) {
               <option value="">請選擇</option>
               {EXPERIENCE.map((x) => <option key={x}>{x}</option>)}
             </select>
+          </div>
+        </div>
+        <div className="row2">
+          <div className="field">
+            <label htmlFor="pf-job">職業（選填）</label>
+            <input id="pf-job" value={form.job} onChange={set('job')} placeholder="例如：工程師" />
+          </div>
+          <div className="field">
+            <label htmlFor="pf-team">支持球隊（選填）</label>
+            <input id="pf-team" value={form.favoriteTeam} onChange={set('favoriteTeam')} placeholder="例如：中信兄弟" />
           </div>
         </div>
         <div className="field">
