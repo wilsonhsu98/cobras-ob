@@ -1,0 +1,25 @@
+// 集合名稱與狀態值集中在這裡，避免各處打錯字
+export const COL = {
+  players: 'players',
+  events: 'events',
+  attendance: 'attendance',
+  bags: 'bags',
+  handoffs: 'handoffs',
+  lineBindings: 'lineBindings',
+};
+
+export const RSVP = { yes: 'yes', maybe: 'maybe', no: 'no' };
+export const RSVP_LABEL = { yes: '會到', maybe: '未定', no: '不會到' };
+
+export const EVENT_TYPE = { practice: 'practice', game: 'game', party: 'party' };
+export const EVENT_TYPE_LABEL = { practice: '練球', game: '比賽', party: '聚會' };
+
+export const EVENT_STATUS = { on: 'on', rain: 'rain' };
+
+export const POSITIONS = ['投手', '捕手', '一壘', '二壘', '三壘', '游擊', '左外野', '中外野', '右外野', '指定打擊'];
+export const INFIELD = ['一壘', '二壘', '三壘', '游擊'];
+export const BATS_THROWS = ['右投右打', '右投左打', '左投左打', '左投右打', '右投兩打'];
+export const EXPERIENCE = ['完全新手', '重新開始', '國小打過', '壘球多年', '高中棒球隊', '更高層級'];
+
+export const TEAM_NAME = 'CobrasOB';
+export const MIN_PLAYERS = 9;

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "batting",
+    "name": "打擊袋",
+    "items": [{ "name": "球棒", "qty": 6 }, { "name": "打擊頭盔", "qty": 5 }, { "name": "練習球", "qty": 30 }],
+    "holder": "江哥",
+    "queue": ["雄哥", "賢哥", "恩哥", "郭董"]
+  },
+  {
+    "id": "catcher",
+    "name": "捕手裝備袋",
+    "items": [{ "name": "捕手護具組", "qty": 2 }, { "name": "捕手手套", "qty": 2 }, { "name": "捕手頭盔", "qty": 2 }],
+    "holder": "小林",
+    "queue": ["達仔", "Kevin"]
+  },
+  {
+    "id": "bases",
+    "name": "壘包與雜物",
+    "items": [{ "name": "壘包", "qty": 3 }, { "name": "本壘板", "qty": 1 }, { "name": "急救箱", "qty": 1 }, { "name": "冰桶", "qty": 1 }],
+    "holder": "霖霖",
+    "queue": ["宏哥", "偉哥", "賢哥"]
+  }
+]

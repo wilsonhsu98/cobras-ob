@@ -1,0 +1,207 @@
+#!/usr/bin/env node
+// 匯入初始資料到 Firestore
+//
+// 本機 Emulator（預設會先清空，再匯入假球員、球具袋與範例活動）：
+//   npm run seed
+//
+// 雲端專案（dev 或 prod）：
+//   npm run seed:remote -- --project cobras-ob-prod --key ./service-account.json --csv ./players.csv
+//   可選：--bags ./scripts/bags.sample.json   匯入球具袋（holder/queue 用綽號對應）
+//         --sample-events                     匯入範例活動（只建議用在 dev 專案）
+//         --force                             players 已有資料時仍繼續匯入
+import { readFileSync } from 'node:fs';
+import { createInterface } from 'node:readline/promises';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+
+const args = process.argv.slice(2);
+const flag = (name) => args.includes(`--${name}`);
+const opt = (name) => {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+
+const EMULATOR = flag('emulator');
+const ROOT = new URL('..', import.meta.url);
+const read = (p) => readFileSync(p.startsWith('.') || p.startsWith('/') ? p : new URL(p, ROOT), 'utf8');
+
+// ───────── 連線 ─────────
+let projectId;
+if (EMULATOR) {
+  projectId = 'demo-cobras';
+  process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8080';
+  initializeApp({ projectId });
+} else {
+  projectId = opt('project');
+  const key = opt('key');
+  if (!projectId || !key || !opt('csv')) {
+    console.error('雲端匯入需要 --project、--key 和 --csv，例如：');
+    console.error('  npm run seed:remote -- --project cobras-ob-prod --key ./service-account.json --csv ./players.csv');
+    process.exit(1);
+  }
+  const sa = JSON.parse(readFileSync(key, 'utf8'));
+  if (sa.project_id !== projectId) {
+    console.error(`金鑰屬於 ${sa.project_id}，但你指定的是 ${projectId}，已停止。`);
+    process.exit(1);
+  }
+  initializeApp({ credential: cert(sa), projectId });
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  console.log(`\n⚠️  即將寫入雲端專案「${projectId}」。`);
+  const answer = await rl.question('請輸入專案 ID 確認：');
+  rl.close();
+  if (answer.trim() !== projectId) {
+    console.log('輸入不符，已取消。');
+    process.exit(1);
+  }
+}
+const db = getFirestore();
+
+// ───────── 工具 ─────────
+function parseCsv(text) {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim());
+  const header = lines.shift().split(',').map((h) => h.trim());
+  return lines.map((line) => {
+    const cells = line.split(',');
+    return Object.fromEntries(header.map((h, i) => [h, (cells[i] || '').trim()]));
+  });
+}
+
+function toPlayer(row) {
+  const num = row.number === '' || row.number == null ? null : Number(row.number);
+  return {
+    name: row.name,
+    nick: row.nick || row.name,
+    number: Number.isFinite(num) ? num : null,
+    isAdmin: String(row.isAdmin).toLowerCase() === 'true',
+    role: row.role || '',
+    positions: row.positions ? row.positions.split(/[\/、]/).map((s) => s.trim()).filter(Boolean) : [],
+    batsThrows: row.batsThrows || '',
+    kid: row.kid || '',
+    experience: row.experience || '',
+    skill: row.skill || '',
+    bound: false,
+    createdAt: FieldValue.serverTimestamp(),
+  };
+}
+
+const TZ = 'Asia/Taipei';
+const todayISO = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const parseISO = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const toISO = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const dateKey = (s) => Number(s.replaceAll('-', ''));
+
+function sampleEvents() {
+  const today = parseISO(todayISO());
+  const nextSun = addDays(today, (7 - today.getDay()) % 7 || 7);
+  const lastSun = addDays(today, -(today.getDay() || 7));
+  const practice = (d, title = '週日練球') => ({
+    date: toISO(d), start: '14:00', end: '17:00', type: 'practice', title,
+    place: '社區國小棒球場', opponent: '', jersey: '練習服',
+  });
+  const game = (d, opponent, place) => ({
+    date: toISO(d), start: '09:00', end: '12:00', type: 'game', title: '友誼賽',
+    place, opponent, jersey: '白色主場球衣',
+  });
+  const list = [
+    practice(addDays(lastSun, -14)),
+    practice(addDays(lastSun, -7)),
+    game(addDays(lastSun, -1), '東區OB隊', '迎風河濱棒球場'),
+    practice(lastSun),
+  ];
+  const opponents = [['老鷹OB隊', '青年公園棒球場'], ['少棒教練團', '美堤河濱棒球場'], ['東區OB隊', '迎風河濱棒球場']];
+  for (let w = 0; w < 6; w++) {
+    const sun = addDays(nextSun, w * 7);
+    if (w % 2 === 0) { const [o, p] = opponents[(w / 2) % 3]; list.push(game(addDays(sun, -1), o, p)); }
+    list.push(practice(sun));
+  }
+  // 讓今天一定有一場，方便測試「當天簽到」
+  if (!list.some((e) => e.date === toISO(today))) {
+    list.push({ ...practice(today, '今日測試活動（Emulator 限定）'), start: '19:00', end: '21:00' });
+  }
+  return list.map((e) => ({ ...e, dateKey: dateKey(e.date), status: 'on', seriesId: null }));
+}
+
+// ───────── 匯入 ─────────
+async function clearEmulator() {
+  const host = process.env.FIRESTORE_EMULATOR_HOST;
+  const res = await fetch(`http://${host}/emulator/v1/projects/${projectId}/databases/(default)/documents`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`清空 Emulator 失敗：${res.status}，Emulator 有啟動嗎？`);
+}
+
+async function main() {
+  if (EMULATOR) {
+    await clearEmulator();
+    console.log('✓ 已清空 Emulator 資料');
+  } else if (!flag('force')) {
+    const existing = await db.collection('players').limit(1).get();
+    if (!existing.empty) {
+      console.error('players 已經有資料，為避免重複匯入已停止。確定要繼續請加上 --force。');
+      process.exit(1);
+    }
+  }
+
+  const writer = db.bulkWriter();
+
+  // 球員
+  const rows = parseCsv(read(opt('csv') || 'scripts/players.sample.csv'));
+  const players = rows.filter((r) => r.name).map((r, i) => ({ id: `p${String(i + 1).padStart(3, '0')}`, ...toPlayer(r) }));
+  for (const { id, ...data } of players) writer.set(db.doc(`players/${id}`), data);
+  console.log(`✓ 球員 ${players.length} 位`);
+
+  // 球具袋
+  const bagsPath = opt('bags') || (EMULATOR ? 'scripts/bags.sample.json' : null);
+  if (bagsPath) {
+    const byNick = new Map(players.map((p) => [p.nick, p.id]));
+    const bags = JSON.parse(read(bagsPath));
+    for (const b of bags) {
+      const holderId = byNick.get(b.holder);
+      if (!holderId) { console.warn(`  ! 找不到「${b.holder}」，略過球具袋「${b.name}」`); continue; }
+      const queue = b.queue.map((n) => byNick.get(n)).filter(Boolean);
+      writer.set(db.doc(`bags/${b.id}`), {
+        name: b.name, items: b.items, holderId, queue, pending: null, updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+    console.log(`✓ 球具袋 ${bags.length} 個`);
+  }
+
+  // 範例活動與出席
+  if (EMULATOR || flag('sample-events')) {
+    const today = todayISO();
+    const events = sampleEvents();
+    let attendanceCount = 0;
+    events.sort((a, b) => a.date.localeCompare(b.date)).forEach((ev, i) => {
+      const eventId = `e${String(i + 1).padStart(3, '0')}`;
+      writer.set(db.doc(`events/${eventId}`), { ...ev, createdAt: FieldValue.serverTimestamp() });
+      const past = ev.date < today;
+      for (const p of players) {
+        if (p.id === 'p001' && !past) continue; // 留給你自己按按看
+        const r = Math.random();
+        let data = null;
+        if (past && r < 0.64) {
+          data = { rsvp: 'yes', checkedIn: true, checkedInAt: Timestamp.fromDate(parseISO(ev.date)) };
+        } else if (!past && r < 0.7) {
+          const k = Math.random();
+          data = { rsvp: k < 0.6 ? 'yes' : k < 0.8 ? 'maybe' : 'no', checkedIn: false, checkedInAt: null };
+        }
+        if (data) {
+          writer.set(db.doc(`events/${eventId}/attendance/${p.id}`), {
+            playerId: p.id, eventId, ...data, updatedAt: FieldValue.serverTimestamp(),
+          });
+          attendanceCount++;
+        }
+      }
+    });
+    console.log(`✓ 活動 ${events.length} 場、出席紀錄 ${attendanceCount} 筆`);
+  }
+
+  await writer.close();
+  console.log('完成！');
+}
+
+main().catch((e) => {
+  console.error(e.message || e);
+  process.exit(1);
+});

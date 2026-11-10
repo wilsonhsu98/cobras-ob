@@ -1,0 +1,27 @@
+/* CobrasOB 設計 token：黑、橘、白（取自隊徽） */
+:root {
+  --bg:#F1EFEC; --surface:#FFFFFF; --surface-2:#F7F5F2; --ink:#17130F; --ink-2:#5E564D; --line:#DDD6CD;
+  --accent:#E8741E; --on-accent:#17110B; --accent-soft:#FCE5D1; --accent-text:#A34A0A; --head:#15120F;
+  --game:#3B342D; --game-soft:#E9E5E0; --party:#8B5A2B; --party-soft:#F1E4D6;
+  --danger:#C62828; --danger-soft:#FBE3E1; --maybe:#8A6100; --maybe-soft:#FFF0C7;
+  --board:#15120F; --board-edge:#3D3027; --bulb:#FF9A3C; --board-ink:#F3EDE3; --board-dim:#B3A697;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0F0D0B; --surface:#1A1714; --surface-2:#221E1A; --ink:#F1ECE4; --ink-2:#A89E92; --line:#342E28;
+    --accent:#F08436; --on-accent:#17110B; --accent-soft:#3A2414; --accent-text:#FFA25C; --head:#060505;
+    --game:#D6CEC4; --game-soft:#2C2723; --party:#D9A06A; --party-soft:#33261A;
+    --danger:#F07069; --danger-soft:#3B1F1D; --maybe:#E8B640; --maybe-soft:#352B10;
+    --board:#0A0807; --board-edge:#3A2C22; --bulb:#FF9A3C; --board-ink:#F3EDE3; --board-dim:#A89A8B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0F0D0B; --surface:#1A1714; --surface-2:#221E1A; --ink:#F1ECE4; --ink-2:#A89E92; --line:#342E28;
+  --accent:#F08436; --on-accent:#17110B; --accent-soft:#3A2414; --accent-text:#FFA25C; --head:#060505;
+  --game:#D6CEC4; --game-soft:#2C2723; --party:#D9A06A; --party-soft:#33261A;
+  --danger:#F07069; --danger-soft:#3B1F1D; --maybe:#E8B640; --maybe-soft:#352B10;
+  --board:#0A0807; --board-edge:#3A2C22; --bulb:#FF9A3C; --board-ink:#F3EDE3; --board-dim:#A89A8B;
+  color-scheme: dark;
+}

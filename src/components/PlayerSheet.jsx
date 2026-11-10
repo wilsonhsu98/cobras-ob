@@ -1,0 +1,37 @@
+import { isPastEvent } from '../lib/dates';
+import { usePlayerCheckins } from '../hooks/useEventAttendance';
+import { useTeamData } from '../hooks/useTeamData';
+import Avatar from './Avatar';
+import Sheet from './Sheet';
+
+export default function PlayerSheet({ playerId, onClose, onEdit }) {
+  const { playerMap, events, me } = useTeamData();
+  const player = playerMap.get(playerId);
+  const { data: checkins } = usePlayerCheckins(playerId);
+  if (!player) return null;
+  const pastCount = events.filter(isPastEvent).length;
+
+  return (
+    <Sheet label={player.nick} onClose={onClose}>
+      <div className="pcard pcard-lg">
+        <div className="pband"><span className="num">{player.number ?? ''}</span><Avatar player={player} /></div>
+        <div className="pbody">
+          <div className="pnick">{player.nick}</div>
+          <div className="pname">{player.name}</div>
+          {player.role && <span className="tag role">{player.role}</span>}
+        </div>
+      </div>
+      <dl className="kv" style={{ marginTop: 12 }}>
+        <dt>守備位置</dt><dd>{player.positions?.join('、') || '—'}</dd>
+        <dt>投打</dt><dd>{player.batsThrows || '—'}</dd>
+        <dt>小孩</dt><dd>{player.kid || '—'}</dd>
+        <dt>棒球經歷</dt><dd>{player.experience || '—'}</dd>
+        <dt>招牌絕技</dt><dd>{player.skill || '—'}</dd>
+        <dt>出席</dt><dd>已舉行 {pastCount} 場，簽到 {checkins.length} 次</dd>
+      </dl>
+      {me?.id === player.id && (
+        <button className="btn" style={{ marginTop: 14 }} onClick={onEdit}>編輯我的球員卡</button>
+      )}
+    </Sheet>
+  );
+}

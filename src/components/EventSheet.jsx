@@ -1,0 +1,118 @@
+import { EVENT_TYPE_LABEL, MIN_PLAYERS, RSVP_LABEL } from '../lib/constants';
+import { dowLabel, isPastEvent, md, todayISO } from '../lib/dates';
+import { countRsvp, coverage } from '../lib/stats';
+import { setCheckin } from '../lib/actions';
+import { useEventAttendance } from '../hooks/useEventAttendance';
+import { useTeamData } from '../hooks/useTeamData';
+import { useToast } from '../hooks/useToast';
+import RsvpButtons from './RsvpButtons';
+import Sheet from './Sheet';
+
+const mapUrl = (place) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
+
+export default function EventSheet({ eventId, onClose }) {
+  const { events, players, me } = useTeamData();
+  const toast = useToast();
+  const event = events.find((e) => e.id === eventId);
+  const { data: attendance } = useEventAttendance(eventId);
+  if (!event) return null;
+
+  const past = isPastEvent(event);
+  const rain = event.status === 'rain';
+  const isToday = event.date === todayISO();
+  const byPlayer = new Map(attendance.map((a) => [a.playerId, a]));
+  const mine = me ? byPlayer.get(me.id) : null;
+  const c = countRsvp(attendance, players.length);
+  const cv = coverage(attendance, players);
+
+  async function toggleCheckin() {
+    const on = !mine?.checkedIn;
+    try {
+      await setCheckin(event.id, me.id, on, mine?.rsvp);
+      toast(on ? '簽到成功，打球愉快！' : '已取消簽到');
+    } catch (e) {
+      console.error(e);
+      toast('簽到失敗，只有活動當天可以簽到');
+    }
+  }
+
+  const head = (
+    <>
+      <span className={`chip t-${event.type}`}>{EVENT_TYPE_LABEL[event.type]}</span>
+      {rain && <span className="chip rain">雨天取消</span>}
+    </>
+  );
+
+  const Names = ({ list, empty = '—' }) => (
+    <div className="names">
+      {list.length ? list.map((p) => {
+        const a = byPlayer.get(p.id);
+        return <span key={p.id} className={a?.checkedIn ? 'in' : ''}>{p.nick}{a?.checkedIn ? ' ✓' : ''}</span>;
+      }) : <span>{empty}</span>}
+    </div>
+  );
+
+  return (
+    <Sheet label={event.title} onClose={onClose} head={head}>
+      <h2>{event.title}{event.opponent && `　對 ${event.opponent}`}</h2>
+      {rain && <div className="banner">這場活動因雨取消</div>}
+      <dl className="kv">
+        <dt>日期</dt><dd>{md(event.date)}（{dowLabel(event.date)}）</dd>
+        <dt>時間</dt><dd>{event.start}–{event.end}</dd>
+        <dt>地點</dt><dd>{event.place}<br /><a href={mapUrl(event.place)} target="_blank" rel="noopener noreferrer">開啟 Google 地圖</a></dd>
+        {event.opponent && <><dt>對手</dt><dd>{event.opponent}</dd></>}
+        <dt>服裝</dt><dd>{event.jersey || '—'}</dd>
+      </dl>
+
+      {past ? (
+        <>
+          <h3 className="sec">當天簽到（{attendance.filter((a) => a.checkedIn).length} 人）</h3>
+          <Names list={players.filter((p) => byPlayer.get(p.id)?.checkedIn)} empty="沒有簽到紀錄" />
+        </>
+      ) : (
+        <>
+          {me && (
+            <>
+              <h3 className="sec">你會出席嗎？</h3>
+              <RsvpButtons eventId={event.id} playerId={me.id} current={mine?.rsvp} disabled={rain} />
+            </>
+          )}
+          {me && isToday && !rain && (
+            <div className="checkin">
+              <button className={`btn ${mine?.checkedIn ? 'ghost' : ''}`} onClick={toggleCheckin}>
+                {mine?.checkedIn ? '已簽到，點一下取消' : '我到球場了，簽到'}
+              </button>
+            </div>
+          )}
+
+          <h3 className="sec">出席名單</h3>
+          {event.type !== 'party' && (
+            <div className="cover">
+              <span className={cv.pitcher ? '' : 'lack'}>投手 {cv.pitcher} 人{cv.pitcher ? '' : '，還缺'}</span>
+              <span className={cv.catcher ? '' : 'lack'}>捕手 {cv.catcher} 人{cv.catcher ? '' : '，還缺'}</span>
+              <span className={c.yes >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.yes} 人{c.yes >= MIN_PLAYERS ? '' : `，不到 ${MIN_PLAYERS} 人`}</span>
+            </div>
+          )}
+          {['yes', 'maybe', 'no'].map((k) => {
+            const list = players.filter((p) => byPlayer.get(p.id)?.rsvp === k);
+            return (
+              <div key={k}>
+                <div className="grp">{RSVP_LABEL[k]}（{list.length}）</div>
+                <Names list={list} />
+              </div>
+            );
+          })}
+          {(() => {
+            const list = players.filter((p) => !byPlayer.get(p.id)?.rsvp);
+            return (
+              <>
+                <div className="grp">尚未回覆（{list.length}）</div>
+                <Names list={list} />
+              </>
+            );
+          })()}
+        </>
+      )}
+    </Sheet>
+  );
+}

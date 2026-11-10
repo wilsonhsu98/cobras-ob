@@ -1,0 +1,29 @@
+{
+  "name": "cobras-ob",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "vite --host",
+    "emulators": "firebase emulators:start --project demo-cobras",
+    "emulators:keep": "firebase emulators:start --project demo-cobras --import=./emulator-data --export-on-exit",
+    "seed": "node scripts/seed.mjs --emulator",
+    "seed:remote": "node scripts/seed.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "netlify:dev": "netlify dev"
+  },
+  "dependencies": {
+    "@line/liff": "^2.24.0",
+    "firebase": "^11.0.0",
+    "firebase-admin": "^13.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.4.0"
+  }
+}

@@ -1,0 +1,92 @@
+rules_version = '2';
+
+// CobrasOB Firestore 權限規則
+// - 登入身分由 Netlify Function（line-auth）發的 custom token 決定
+// - token claims：playerId（綁定的球員）、admin（是否為管理者）
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function authed()  { return request.auth != null; }
+    function member()  { return authed() && ('playerId' in request.auth.token); }
+    function me()      { return request.auth.token.playerId; }
+    function isAdmin() { return authed() && request.auth.token.get('admin', false) == true; }
+    function onlyChanged(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+    // 台北時間的今天，格式同 events.dateKey（例如 20261115）
+    function taipeiDateKey() {
+      let t = request.time + duration.value(8, 'h');
+      return t.year() * 10000 + t.month() * 100 + t.day();
+    }
+
+    // ── 球員 ──
+    // 尚未綁定的人（已通過 LINE 驗證）也能讀名單，才能從名單選自己
+    match /players/{playerId} {
+      allow read: if authed();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (member() && me() == playerId
+            && onlyChanged(['nick', 'number', 'positions', 'batsThrows', 'kid',
+                            'experience', 'skill', 'updatedAt']));
+    }
+
+    // ── 活動與出席 ──
+    match /events/{eventId} {
+      allow read: if member();
+      allow write: if isAdmin();
+
+      match /attendance/{playerId} {
+        allow read: if member();
+        allow delete: if isAdmin();
+        allow create, update: if isAdmin()
+          || (member() && me() == playerId && validAttendance(eventId, playerId));
+      }
+    }
+
+    function validAttendance(eventId, playerId) {
+      let d = request.resource.data;
+      let before = resource == null ? {} : resource.data;
+      let ev = get(/databases/$(database)/documents/events/$(eventId)).data;
+      let checkinChanged = d.get('checkedIn', false) != before.get('checkedIn', false);
+      return d.playerId == playerId
+        && d.eventId == eventId
+        && d.keys().hasOnly(['playerId', 'eventId', 'rsvp', 'checkedIn', 'checkedInAt', 'updatedAt'])
+        && (d.get('rsvp', null) == null || d.rsvp in ['yes', 'maybe', 'no'])
+        // 簽到只能在活動當天（台北時間）
+        && (!checkinChanged || ev.dateKey == taipeiDateKey());
+    }
+
+    // 出席統計用的 collectionGroup 查詢
+    match /{path=**}/attendance/{playerId} {
+      allow read: if member();
+    }
+
+    // ── 球具袋：兩段式交接 ──
+    // 1. 保管人發起：只能改 pending
+    // 2. 被指定的人確認：把 holderId 改成自己、輪值順序、清掉 pending
+    match /bags/{bagId} {
+      allow read: if member();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (member() && me() == resource.data.holderId
+            && onlyChanged(['pending', 'updatedAt']))
+        || (member() && resource.data.pending != null
+            && resource.data.pending.toId == me()
+            && request.resource.data.holderId == me()
+            && onlyChanged(['holderId', 'queue', 'pending', 'updatedAt']));
+    }
+
+    match /handoffs/{handoffId} {
+      allow read: if member();
+      allow create: if member() && request.resource.data.fromId == me();
+      allow update: if isAdmin()
+        || (member() && (resource.data.toId == me() || resource.data.fromId == me()));
+    }
+
+    // ── LINE 綁定表：只有 Netlify Function（Admin SDK）寫入，管理者可讀取與解除 ──
+    match /lineBindings/{lineUserId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if false;
+    }
+  }
+}

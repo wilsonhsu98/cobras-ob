@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.netlify/
+
+# 環境變數與金鑰：絕對不要 commit
+.env
+.env.local
+.env.*.local
+.env.production
+service-account*.json
+*-firebase-adminsdk-*.json
+
+# 真實隊員名單（含姓名）：只匯入 Firestore，不要放進版本控制
+players.csv
+
+# Emulator 匯出的本機資料
+emulator-data/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+.DS_Store
