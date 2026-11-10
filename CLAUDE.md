@@ -45,6 +45,7 @@ handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, creat
 lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function 寫入，管理者可讀、可刪）
 ```
 
+- 守備位置 `positions[]` 只有投手、捕手、一壘手、內野手、外野手（`POSITIONS`），可複選；點將錄的「內野」篩選包含一壘手與內野手。
 - 管理職 `role` 只有隊長、副隊長、總務、教練（`ADMIN_ROLES`）或空字串；有管理職就是管理者（`isAdmin` 跟著設成 true），沒有就是一般隊員。每個職務可以有多人，一人只有一個職務。管理頁用下拉選單設定（`setPlayerRole`），球員自己改不了。
 - 出席紀錄的文件 ID 就是 playerId，一人一場一筆。人數統計在前端算，不維護計數器。
 - 重複練球展開成多筆活動文件（`seriesId` 串起來），不存 RRULE。

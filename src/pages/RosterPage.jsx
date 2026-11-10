@@ -11,7 +11,7 @@ const FILTERS = {
   投手: (p) => p.positions?.includes('投手'),
   捕手: (p) => p.positions?.includes('捕手'),
   內野: (p) => p.positions?.some((x) => INFIELD.includes(x)),
-  外野: (p) => p.positions?.some((x) => x.includes('外野')),
+  外野: (p) => p.positions?.includes('外野手'),
   新加入棒球: (p) => p.experience === '完全新手',
 };
 
