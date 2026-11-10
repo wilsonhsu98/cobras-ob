@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useLayoutEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { TeamDataProvider, useTeamData } from './hooks/useTeamData';
 import { ToastProvider } from './hooks/useToast';
@@ -39,11 +40,19 @@ function Gate() {
   );
 }
 
+// 切換分頁時回到頁面頂端（react-router 預設不會重設捲動位置）
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useLayoutEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
 function Shell() {
   const { loading, error } = useTeamData();
   if (loading) return <Splash text="載入資料中…" />;
   return (
     <>
+      <ScrollToTop />
       <Header />
       <main>
         {error && <div className="notice" style={{ marginBottom: 12 }}>部分資料讀取失敗：{error.code || error.message}</div>}
