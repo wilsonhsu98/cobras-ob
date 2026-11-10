@@ -11,8 +11,13 @@ export const COL = {
 export const RSVP = { yes: 'yes', maybe: 'maybe', no: 'no' };
 export const RSVP_LABEL = { yes: '會到', maybe: '未定', no: '不會到' };
 
-export const EVENT_TYPE = { practice: 'practice', game: 'game', party: 'party' };
-export const EVENT_TYPE_LABEL = { practice: '練球', game: '比賽', party: '聚會' };
+// 比賽依用球分三種：硬式棒球、軟式棒球（rubberball）、壘球
+export const EVENT_TYPE = {
+  practice: 'practice', hardball: 'hardball', rubberball: 'rubberball', softball: 'softball', party: 'party',
+};
+export const EVENT_TYPE_LABEL = {
+  practice: '練球', hardball: '硬式比賽', rubberball: '軟式比賽', softball: '壘球比賽', party: '聚會',
+};
 
 export const EVENT_STATUS = { on: 'on', rain: 'rain' };
 

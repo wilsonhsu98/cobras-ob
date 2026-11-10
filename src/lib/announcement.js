@@ -2,7 +2,7 @@ import { EVENT_TYPE_LABEL, TEAM_NAME } from './constants';
 import { md, dowShort } from './dates';
 import { countRsvp, coverage } from './stats';
 
-const ICON = { practice: '⚾', game: '🏟️', party: '🍻' };
+const ICON = { practice: '⚾', hardball: '🏟️', rubberball: '🏟️', softball: '🏟️', party: '🍻' };
 
 export function buildAnnouncement(event, attendance, players, link) {
   const lines = [`🐍 ${TEAM_NAME}｜${ICON[event.type]} ${EVENT_TYPE_LABEL[event.type]}通知`];

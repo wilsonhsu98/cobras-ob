@@ -35,7 +35,7 @@
 players/{playerId}            name, nick, number, isAdmin, role, positions[], batsThrows,
                               kid, experience, skill, bound
 events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
-                              type(practice|game|party), title, place, opponent, jersey,
+                              type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey,
                               status(on|rain), seriesId
 events/{eventId}/attendance/{playerId}
                               playerId, eventId, rsvp(yes|maybe|no|null),

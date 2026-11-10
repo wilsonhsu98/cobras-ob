@@ -101,8 +101,8 @@ function sampleEvents() {
     date: toISO(d), start: '14:00', end: '17:00', type: 'practice', title,
     place: '社區國小棒球場', opponent: '', jersey: '練習服',
   });
-  const game = (d, opponent, place) => ({
-    date: toISO(d), start: '09:00', end: '12:00', type: 'game', title: '友誼賽',
+  const game = (d, opponent, place, type = 'hardball') => ({
+    date: toISO(d), start: '09:00', end: '12:00', type, title: '友誼賽',
     place, opponent, jersey: '白色主場球衣',
   });
   const list = [
@@ -112,9 +112,23 @@ function sampleEvents() {
     practice(lastSun),
   ];
   const opponents = [['老鷹OB隊', '青年公園棒球場'], ['少棒教練團', '美堤河濱棒球場'], ['東區OB隊', '迎風河濱棒球場']];
+  const gameTypes = ['hardball', 'rubberball', 'softball'];
   for (let w = 0; w < 6; w++) {
     const sun = addDays(nextSun, w * 7);
-    if (w % 2 === 0) { const [o, p] = opponents[(w / 2) % 3]; list.push(game(addDays(sun, -1), o, p)); }
+    if (w % 2 === 0) {
+      const i = (w / 2) % 3;
+      const [o, p] = opponents[i];
+      list.push(game(addDays(sun, -1), o, p, gameTypes[i]));
+    }
+    if (w === 1) {
+      // 同一天兩場壘球賽，測試同日多場活動的顯示
+      const sat = addDays(sun, -1);
+      list.push({ ...game(sat, '老鷹OB隊', '青年公園壘球場', 'softball'), title: '壘球友誼賽（上午場）' });
+      list.push({
+        ...game(sat, '少棒教練團', '青年公園壘球場', 'softball'),
+        start: '13:00', end: '16:00', title: '壘球友誼賽（下午場）',
+      });
+    }
     list.push(practice(sun));
   }
   // 讓今天一定有一場，方便測試「當天簽到」
