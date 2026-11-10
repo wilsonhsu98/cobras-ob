@@ -88,6 +88,30 @@ function toPlayer(row) {
   };
 }
 
+// Emulator 限定的範例圖片：用 SVG 資料網址當球具照片與球員頭像，不需要另外放圖檔
+const svgUrl = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+const emojiSvg = (emoji, c1, c2, label = '') => svgUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">'
+  + `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>`
+  + '<rect width="400" height="300" fill="url(#g)"/>'
+  + `<text x="200" y="${label ? 170 : 195}" font-size="${label ? 130 : 200}" text-anchor="middle">${emoji}</text>`
+  + (label ? `<text x="200" y="262" font-size="34" font-weight="700" text-anchor="middle" fill="#fff">${label}</text>` : '')
+  + '</svg>'
+);
+const DEMO_BAG_PHOTOS = {
+  batting: ['⚾', '#c2410c', '#7c2d12'],
+  catcher: ['🧤', '#1d4ed8', '#1e3a8a'],
+  bases: ['🧰', '#047857', '#064e3b'],
+};
+// 球具保管人（江哥、小林、霖霖）都要有頭像，球具頁才看得到效果
+const DEMO_AVATARS = {
+  宏哥: ['😎', '#f59e0b', '#b45309'],
+  阿明: ['🧢', '#2563eb', '#1e40af'],
+  小林: ['🧤', '#16a34a', '#14532d'],
+  江哥: ['⚾', '#dc2626', '#7f1d1d'],
+  霖霖: ['🥎', '#9333ea', '#581c87'],
+};
+
 const TZ = 'Asia/Taipei';
 const todayISO = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -166,12 +190,16 @@ async function main() {
   const rows = parseCsv(read(opt('csv') || 'scripts/players.sample.csv'));
   const players = rows.filter((r) => r.name).map((r, i) => ({ id: `p${String(i + 1).padStart(3, '0')}`, ...toPlayer(r) }));
   // Emulator 限定：幾位球員帶頭像（pictureUrl 平常由 line-auth 寫入），
-  // 其中一張故意找不到，用來測試載入失敗時退回姓氏
+  // 其中一張（阿榮）故意找不到，用來測試載入失敗時退回姓氏
   const demoPictures = EMULATOR
-    ? { p001: '/apple-touch-icon.png', p002: '/favicon.png', p003: '/no-such-avatar.png' }
+    ? {
+      ...Object.fromEntries(Object.entries(DEMO_AVATARS).map(([nick, a]) => [nick, emojiSvg(...a)])),
+      阿榮: '/no-such-avatar.png',
+    }
     : {};
   for (const { id, ...data } of players) {
-    writer.set(db.doc(`players/${id}`), demoPictures[id] ? { ...data, pictureUrl: demoPictures[id] } : data);
+    const pictureUrl = demoPictures[data.nick];
+    writer.set(db.doc(`players/${id}`), pictureUrl ? { ...data, pictureUrl } : data);
   }
   console.log(`✓ 球員 ${players.length} 位`);
 
@@ -186,6 +214,12 @@ async function main() {
       writer.set(db.doc(`bags/${b.id}`), {
         name: b.name, items: b.items, holderId, updatedAt: FieldValue.serverTimestamp(),
       });
+      if (EMULATOR) {
+        const [emoji, c1, c2] = DEMO_BAG_PHOTOS[b.id] || ['🎒', '#57534e', '#292524'];
+        writer.set(db.doc(`bagPhotos/${b.id}`), {
+          dataUrl: emojiSvg(emoji, c1, c2, b.name), updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
     }
     console.log(`✓ 球具袋 ${bags.length} 個`);
   }

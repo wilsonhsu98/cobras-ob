@@ -7,10 +7,11 @@ import { useAuth } from '../hooks/useAuth';
 import { useBagPhotos } from '../hooks/useBagPhotos';
 import { useQuery } from '../hooks/useFirestore';
 import { useTeamData } from '../hooks/useTeamData';
+import Avatar from '../components/Avatar';
 import TakeoverSheet from '../components/TakeoverSheet';
 
 export default function GearPage() {
-  const { bags, me, nickOf } = useTeamData();
+  const { bags, me, nickOf, playerMap } = useTeamData();
   const { admin } = useAuth();
   const photos = useBagPhotos();
   const [sheet, setSheet] = useState(null); // { bag, assign }
@@ -33,7 +34,10 @@ export default function GearPage() {
           {photos.get(b.id) && <img className="bag-photo" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
           <div className="bag-name">{b.name}</div>
           <div className="bag-items">{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}</div>
-          <div className="holder"><small>目前保管</small><b>{nickOf(b.holderId)}</b></div>
+          <div className="holder">
+            {playerMap.get(b.holderId) && <Avatar player={playerMap.get(b.holderId)} size={44} />}
+            <div><small>目前保管</small><b>{nickOf(b.holderId)}</b></div>
+          </div>
           {b.holderId !== me?.id && (
             <button className="btn" onClick={() => setSheet({ bag: b, assign: false })}>我來保管</button>
           )}
