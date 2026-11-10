@@ -79,6 +79,39 @@ export async function unbindPlayer(playerId) {
 
 export const deletePlayer = (playerId) => deleteDoc(doc(db, COL.players, playerId));
 
+// ── 球具袋管理（管理者）──
+// photo：圖片資料網址；undefined 代表不動照片，null 代表移除
+const bagPhotoRef = (bagId) => doc(db, COL.bagPhotos, bagId);
+
+function applyBagPhoto(batch, bagId, photo) {
+  if (photo === undefined) return;
+  if (photo) batch.set(bagPhotoRef(bagId), { dataUrl: photo, updatedAt: serverTimestamp() });
+  else batch.delete(bagPhotoRef(bagId));
+}
+
+export async function addBag({ name, items, holderId, photo }) {
+  const ref = doc(collection(db, COL.bags));
+  const batch = writeBatch(db);
+  batch.set(ref, { name, items, holderId, updatedAt: serverTimestamp() });
+  applyBagPhoto(batch, ref.id, photo);
+  await batch.commit();
+}
+
+export async function updateBag(bagId, { name, items }, photo) {
+  const batch = writeBatch(db);
+  batch.update(doc(db, COL.bags, bagId), { name, items, updatedAt: serverTimestamp() });
+  applyBagPhoto(batch, bagId, photo);
+  await batch.commit();
+}
+
+// 保管紀錄（handoffs）會保留，上面記有當時的球具袋名稱
+export async function deleteBag(bagId) {
+  const batch = writeBatch(db);
+  batch.delete(doc(db, COL.bags, bagId));
+  batch.delete(bagPhotoRef(bagId));
+  await batch.commit();
+}
+
 // ── 球具保管（一步完成）──
 // 接手：toId === byId === 自己。指定別人：byId 是管理者（rules 擋掉一般成員）。
 // 用 transaction 讀最新的保管人當 fromId，同時接手時紀錄才不會錯。

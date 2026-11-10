@@ -4,6 +4,7 @@ import { db } from '../lib/firebase';
 import { COL } from '../lib/constants';
 import { shortDate } from '../lib/dates';
 import { useAuth } from '../hooks/useAuth';
+import { useBagPhotos } from '../hooks/useBagPhotos';
 import { useQuery } from '../hooks/useFirestore';
 import { useTeamData } from '../hooks/useTeamData';
 import TakeoverSheet from '../components/TakeoverSheet';
@@ -11,6 +12,7 @@ import TakeoverSheet from '../components/TakeoverSheet';
 export default function GearPage() {
   const { bags, me, nickOf } = useTeamData();
   const { admin } = useAuth();
+  const photos = useBagPhotos();
   const [sheet, setSheet] = useState(null); // { bag, assign }
   const { data: history } = useQuery(
     () => query(collection(db, COL.handoffs), orderBy('createdAt', 'desc'), limit(20)), []
@@ -28,6 +30,7 @@ export default function GearPage() {
 
       {bags.map((b) => (
         <div className="bag" key={b.id}>
+          {photos.get(b.id) && <img className="bag-photo" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
           <div className="bag-name">{b.name}</div>
           <div className="bag-items">{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}</div>
           <div className="holder"><small>目前保管</small><b>{nickOf(b.holderId)}</b></div>

@@ -5,12 +5,14 @@ import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
 import { USE_EMULATOR } from '../lib/firebase';
 import {
-  addPlayer, createEvents, deleteEvent, deletePlayer, setEventStatus, setPlayerRole, unbindPlayer,
+  addPlayer, createEvents, deleteBag, deleteEvent, deletePlayer, setEventStatus, setPlayerRole, unbindPlayer,
 } from '../lib/actions';
 import { useAuth } from '../hooks/useAuth';
+import { useBagPhotos } from '../hooks/useBagPhotos';
 import { useAllCheckins, useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
+import BagSheet from '../components/BagSheet';
 
 export default function AdminPage() {
   const { admin } = useAuth();
@@ -23,6 +25,7 @@ export default function AdminPage() {
       <NewEventForm />
       <EventStatusList />
       <AnnouncementCard />
+      <BagAdmin />
       <PlayerAdmin />
       <AttendanceRanking />
     </>
@@ -168,6 +171,42 @@ function AnnouncementCard() {
           <button className={`btn ${USE_EMULATOR ? '' : 'ghost'}`} onClick={copy}>複製文字</button>
         </div>
       </div>
+    </>
+  );
+}
+
+function BagAdmin() {
+  const { bags, nickOf } = useTeamData();
+  const photos = useBagPhotos();
+  const run = useRunner();
+  const [sheet, setSheet] = useState(null); // { bag }，bag 為 null 代表新增
+
+  return (
+    <>
+      <h3 className="sec">球具管理</h3>
+      <div className="card">
+        <button className="btn" onClick={() => setSheet({ bag: null })}>新增球具</button>
+        <div style={{ marginTop: 8 }}>
+          {bags.map((b) => (
+            <div className="mrow" key={b.id}>
+              {photos.get(b.id) && <img className="bag-thumb" src={photos.get(b.id)} alt="" />}
+              <div className="t">
+                <b>{b.name}</b>
+                <div>{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}　保管：{nickOf(b.holderId)}</div>
+              </div>
+              <button className="btn small ghost" onClick={() => setSheet({ bag: b })}>編輯</button>
+              <button
+                className="btn small danger"
+                onClick={() => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); }}
+              >刪除</button>
+            </div>
+          ))}
+          {bags.length === 0 && <div className="hint">還沒有球具。</div>}
+        </div>
+      </div>
+      {sheet && (
+        <BagSheet bag={sheet.bag} photo={sheet.bag ? photos.get(sheet.bag.id) : undefined} onClose={() => setSheet(null)} />
+      )}
     </>
   );
 }

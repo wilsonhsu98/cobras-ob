@@ -156,6 +156,14 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .holder small { display: block; font-size: 13px; color: var(--ink-2); }
 .holder b { font-size: 19px; }
 .bag .btn + .btn { margin-top: 8px; }
+.bag-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+.bag > .bag-photo { margin-bottom: 12px; }
+.bag-photo.empty { display: grid; place-items: center; font-size: 14px; color: var(--ink-2); border: 1px dashed var(--line); }
+.bag-thumb { width: 56px; height: 56px; flex: none; object-fit: cover; border-radius: 10px; }
+.item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.item-row .nm { flex: 1; min-width: 0; }
+.item-row .qty { width: 76px; flex: none; }
+.item-row .btn { width: 48px; min-height: 48px; flex: none; padding: 0; }
 .hist { list-style: none; padding: 0; margin: 0; }
 .hist li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; font-size: 15px; }
 .hist .when { color: var(--ink-2); font-size: 13px; }

@@ -15,6 +15,7 @@
 - **LINE 登入用 custom token**：LIFF 取得 LINE ID token → Netlify Function `line-auth` 向 LINE verify API 驗證 → 查 `lineBindings` → firebase-admin 發 custom token（claims：`playerId`、`admin`）→ 前端 `signInWithCustomToken`。不用 Firebase OIDC provider（需付費升級，且在 LINE 內體驗較差）。
 - **Netlify** 放網頁與 Function。SPA 由 `netlify.toml` 的 redirect 處理。
 - 狀態管理只用 React context + Firestore `onSnapshot`（`src/hooks/useFirestore.js`），不另外引入狀態管理套件。
+- **圖片不用 Firebase Storage**（需升級 Blaze 並綁信用卡，且免費額度只限 us-central1／us-east1／us-west1 的 bucket）。球具照片在瀏覽器縮成 JPEG 資料網址（`src/lib/image.js`，約 25 萬字元以內），存在 Firestore 的 `bagPhotos`。之後若真的需要更多、更大的照片，再改成 Storage 存網址。
 - 不做主動推播（LINE Messaging API 推播到群組依人數計費）。公告用管理頁「複製文字」或 `liff.shareTargetPicker()`。
 
 ## 環境
@@ -41,6 +42,7 @@ events/{eventId}/attendance/{playerId}
                               playerId, eventId, rsvp(yes|maybe|no|null),
                               checkedIn, checkedInAt, updatedAt
 bags/{bagId}                  name, items[{name,qty}], holderId
+bagPhotos/{bagId}             dataUrl, updatedAt   （球具照片，文件 ID 同 bagId；另放一個集合，只有球具頁與管理頁訂閱）
 handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, createdAt   （保管紀錄，建立後不可改）
 lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function 寫入，管理者可讀、可刪）
 ```
@@ -60,6 +62,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - `pictureUrl`（LINE 頭像網址）只有 `line-auth` Function 在登入時寫入，來源是 LINE ID token 的 `picture`；解除綁定時清掉。前端 Avatar 有頭像就顯示，沒有或載入失敗就退回姓氏。
 - 簽到（`checkedIn` 變動）只能在活動當天，rules 用 `request.time + 8h` 對 `dateKey` 比對。
 - 球具保管一步完成、沒有輪值：任何成員都能接手（只能把 `holderId` 改成自己，不需原保管人同意）；指定別人保管只有管理者。每次換手寫一筆 `handoffs`（`byId` 不等於 `toId` 代表是管理者指定）。
+- 球具新增、編輯（名稱、品項、照片）、刪除只有管理者，在「管理」頁的「球具管理」。`bagPhotos` 成員可讀、管理者可寫，rules 限制只有 `dataUrl`、`updatedAt` 兩個欄位且 `dataUrl` 不超過 40 萬字元。刪除球具時 `handoffs` 保留（上面記有當時的球具名稱）。
 - 改 rules 時請在 Emulator 實際操作驗證。
 
 ## 設計規範
@@ -90,8 +93,7 @@ npm run build       # 正式建置
 ## 待辦（依優先順序）
 
 1. 實際串接 LINE（dev 專案 + 測試用 LIFF）並驗證綁定流程
-2. 管理頁：球具袋管理（新增、刪除袋子、編輯內容物；指定保管人已在球具頁完成）
-3. 管理頁：編輯單場活動內容（目前只能改雨天狀態或刪除）
-4. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
-5. 尾牙功能：年度出席統計頁、獎項名單
-6. 比賽紀錄（比數、MVP）、照片連結
+2. 管理頁：編輯單場活動內容（目前只能改雨天狀態或刪除）
+3. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
+4. 尾牙功能：年度出席統計頁、獎項名單
+5. 比賽紀錄（比數、MVP）、照片連結

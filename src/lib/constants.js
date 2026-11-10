@@ -4,6 +4,7 @@ export const COL = {
   events: 'events',
   attendance: 'attendance',
   bags: 'bags',
+  bagPhotos: 'bagPhotos',
   handoffs: 'handoffs',
   lineBindings: 'lineBindings',
 };
