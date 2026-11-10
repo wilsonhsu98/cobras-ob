@@ -133,7 +133,8 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .pcard { display: flex; flex-direction: column; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; text-align: left; padding: 0; }
 .pband { position: relative; flex: none; height: 62px; background: var(--head); color: var(--accent); border-bottom: 3px solid var(--accent); }
 .pband .num { position: absolute; right: 10px; top: -4px; font-size: 58px; line-height: 1; }
-.avatar { position: absolute; left: 12px; bottom: -22px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 20px; color: #fff; border: 3px solid var(--surface); }
+.avatar { position: absolute; left: 12px; bottom: -22px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 20px; color: #fff; border: 3px solid var(--surface); overflow: hidden; }
+.avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .pbody { padding: 28px 12px 12px; }
 .pnick { font-weight: 900; font-size: 18px; line-height: 1.25; }
 .pname { font-size: 14px; color: var(--ink-2); }

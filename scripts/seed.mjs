@@ -162,7 +162,14 @@ async function main() {
   // 球員
   const rows = parseCsv(read(opt('csv') || 'scripts/players.sample.csv'));
   const players = rows.filter((r) => r.name).map((r, i) => ({ id: `p${String(i + 1).padStart(3, '0')}`, ...toPlayer(r) }));
-  for (const { id, ...data } of players) writer.set(db.doc(`players/${id}`), data);
+  // Emulator 限定：幾位球員帶頭像（pictureUrl 平常由 line-auth 寫入），
+  // 其中一張故意找不到，用來測試載入失敗時退回姓氏
+  const demoPictures = EMULATOR
+    ? { p001: '/apple-touch-icon.png', p002: '/favicon.png', p003: '/no-such-avatar.png' }
+    : {};
+  for (const { id, ...data } of players) {
+    writer.set(db.doc(`players/${id}`), demoPictures[id] ? { ...data, pictureUrl: demoPictures[id] } : data);
+  }
   console.log(`✓ 球員 ${players.length} 位`);
 
   // 球具袋

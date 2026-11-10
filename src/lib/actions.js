@@ -71,7 +71,8 @@ export async function unbindPlayer(playerId) {
   const snap = await getDocs(query(collection(db, COL.lineBindings), where('playerId', '==', playerId)));
   const batch = writeBatch(db);
   snap.forEach((d) => batch.delete(d.ref));
-  batch.update(doc(db, COL.players, playerId), { bound: false });
+  // 這個位子可能換別人綁，舊的 LINE 頭像一起清掉
+  batch.update(doc(db, COL.players, playerId), { bound: false, pictureUrl: null });
   await batch.commit();
 }
 

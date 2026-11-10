@@ -33,7 +33,7 @@
 
 ```
 players/{playerId}            name, nick, number, isAdmin, role, positions[], batsThrows,
-                              kid, experience, skill, bound
+                              kid, experience, skill, bound, pictureUrl
 events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
                               type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey,
                               status(on|rain), seriesId
@@ -54,7 +54,8 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 ## 權限（firestore.rules）
 
 - 已通過 LINE 驗證但尚未綁定的人只能讀 `players`（用來選自己）。
-- 球員只能改自己的出席紀錄、自己的球員卡（不能改 `isAdmin`、`bound`）。
+- 球員只能改自己的出席紀錄、自己的球員卡（不能改 `isAdmin`、`bound`、`pictureUrl`）。
+- `pictureUrl`（LINE 頭像網址）只有 `line-auth` Function 在登入時寫入，來源是 LINE ID token 的 `picture`；解除綁定時清掉。前端 Avatar 有頭像就顯示，沒有或載入失敗就退回姓氏。
 - 簽到（`checkedIn` 變動）只能在活動當天，rules 用 `request.time + 8h` 對 `dateKey` 比對。
 - 球具保管一步完成、沒有輪值：任何成員都能接手（只能把 `holderId` 改成自己，不需原保管人同意）；指定別人保管只有管理者。每次換手寫一筆 `handoffs`（`byId` 不等於 `toId` 代表是管理者指定）。
 - 改 rules 時請在 Emulator 實際操作驗證。

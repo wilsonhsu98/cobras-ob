@@ -51,7 +51,7 @@ export default async (req) => {
     body: new URLSearchParams({ id_token: idToken, client_id: process.env.LINE_CHANNEL_ID || '' }),
   });
   if (!verify.ok) return json({ error: 'LINE 驗證失敗，請重新登入' }, 401);
-  const { sub: lineUserId, name: lineName = '' } = await verify.json();
+  const { sub: lineUserId, name: lineName = '', picture: pictureUrl = '' } = await verify.json();
 
   const db = getFirestore();
   const bindingRef = db.doc(`lineBindings/${lineUserId}`);
@@ -90,6 +90,11 @@ export default async (req) => {
       playerId = undefined;
     } else {
       admin = player.data().isAdmin === true;
+      // 頭像跟著 LINE 更新。pictureUrl 只有這裡（Admin SDK）能寫，球員自己改不到；
+      // 頭像只是裝飾，寫入失敗不該擋住登入
+      if (pictureUrl && pictureUrl !== player.data().pictureUrl) {
+        await player.ref.update({ pictureUrl }).catch((e) => console.error('更新頭像失敗', e));
+      }
     }
   }
 
