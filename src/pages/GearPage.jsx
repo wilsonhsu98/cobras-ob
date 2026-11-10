@@ -31,12 +31,16 @@ export default function GearPage() {
 
       {bags.map((b) => (
         <div className="bag" key={b.id}>
-          {photos.get(b.id) && <img className="bag-photo" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
-          <div className="bag-name">{b.name}</div>
-          <div className="bag-items">{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}</div>
+          <div className="bag-head">
+            <div>
+              <div className="bag-name">{b.name}</div>
+              <div className="bag-items">{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}</div>
+            </div>
+            {photos.get(b.id) && <img className="bag-pic" src={photos.get(b.id)} alt={`${b.name}的照片`} />}
+          </div>
           <div className="holder">
-            {playerMap.get(b.holderId) && <Avatar player={playerMap.get(b.holderId)} size={44} />}
             <div><small>目前保管</small><b>{nickOf(b.holderId)}</b></div>
+            {playerMap.get(b.holderId) && <Avatar player={playerMap.get(b.holderId)} />}
           </div>
           {b.holderId !== me?.id && (
             <button className="btn" onClick={() => setSheet({ bag: b, assign: false })}>我來保管</button>
