@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { ADMIN_ROLES } from '../src/lib/constants.js';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
@@ -69,12 +70,14 @@ function parseCsv(text) {
 
 function toPlayer(row) {
   const num = row.number === '' || row.number == null ? null : Number(row.number);
+  const role = row.role || '';
   return {
     name: row.name,
     nick: row.nick || row.name,
     number: Number.isFinite(num) ? num : null,
-    isAdmin: String(row.isAdmin).toLowerCase() === 'true',
-    role: row.role || '',
+    // 有管理職（隊長、副隊長、總務、教練）就是管理者；isAdmin 欄位仍可單獨指定
+    isAdmin: ADMIN_ROLES.includes(role) || String(row.isAdmin).toLowerCase() === 'true',
+    role,
     positions: row.positions ? row.positions.split(/[\/、]/).map((s) => s.trim()).filter(Boolean) : [],
     batsThrows: row.batsThrows || '',
     kid: row.kid || '',

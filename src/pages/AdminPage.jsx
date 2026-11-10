@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { EVENT_TYPE, EVENT_TYPE_LABEL, JERSEYS } from '../lib/constants';
+import { ADMIN_ROLES, EVENT_TYPE, EVENT_TYPE_LABEL, JERSEYS } from '../lib/constants';
 import { dowShort, isPastEvent, isWeekend, md } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
 import { USE_EMULATOR } from '../lib/firebase';
 import {
-  addPlayer, createEvents, deleteEvent, deletePlayer, setEventStatus, setPlayerAdmin, unbindPlayer,
+  addPlayer, createEvents, deleteEvent, deletePlayer, setEventStatus, setPlayerRole, unbindPlayer,
 } from '../lib/actions';
 import { useAuth } from '../hooks/useAuth';
 import { useAllCheckins, useEventAttendance } from '../hooks/useEventAttendance';
@@ -185,6 +185,9 @@ function PlayerAdmin() {
     if (ok) setForm({ name: '', nick: '', number: '' });
   }
 
+  const changeRole = (p, role) =>
+    run(() => setPlayerRole(p.id, role), role ? `${p.nick} 已設為${role}` : `${p.nick} 已改為一般隊員`);
+
   return (
     <>
       <h3 className="sec">球員管理</h3>
@@ -195,16 +198,21 @@ function PlayerAdmin() {
           <div className="field"><label htmlFor="np-no">背號</label><input id="np-no" inputMode="numeric" value={form.number} onChange={set('number')} /></div>
         </div>
         <button className="btn" onClick={add} disabled={!form.name.trim()}>新增球員</button>
-        <p className="hint">新增後，對方打開網頁就能在名單中找到自己完成綁定。變更管理者身分後，對方重新打開網頁才會生效。</p>
+        <p className="hint">新增後，對方打開網頁就能在名單中找到自己完成綁定。有管理職（隊長、副隊長、總務、教練）的人就有管理權限，變更後對方重新打開網頁才會生效。</p>
       </div>
       <div className="card" style={{ marginTop: 10 }}>
         {players.map((p) => (
           <div className="mrow" key={p.id}>
-            <div className="t"><b>{p.nick}</b><div>{p.name}　{p.bound ? '已綁定 LINE' : '尚未綁定'}{p.isAdmin ? '　管理者' : ''}</div></div>
+            <div className="t"><b>{p.nick}</b><div>{p.name}　{p.bound ? '已綁定 LINE' : '尚未綁定'}{p.role ? `　${p.role}` : p.isAdmin ? '　管理者' : ''}</div></div>
             {p.id !== myId && (
-              <button className="btn small ghost" onClick={() => run(() => setPlayerAdmin(p.id, !p.isAdmin), p.isAdmin ? '已取消管理者' : '已設為管理者')}>
-                {p.isAdmin ? '取消管理' : '設為管理'}
-              </button>
+              <select
+                aria-label={`${p.nick} 的管理職`}
+                value={ADMIN_ROLES.includes(p.role) ? p.role : ''}
+                onChange={(e) => changeRole(p, e.target.value)}
+              >
+                <option value="">一般隊員</option>
+                {ADMIN_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
             )}
             {p.bound && (
               <button className="btn small ghost" onClick={() => { if (confirm(`解除 ${p.nick} 的 LINE 綁定？對方下次打開要重新選人。`)) run(() => unbindPlayer(p.id), '已解除綁定'); }}>解除綁定</button>

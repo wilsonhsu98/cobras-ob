@@ -45,6 +45,7 @@ handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, creat
 lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function 寫入，管理者可讀、可刪）
 ```
 
+- 管理職 `role` 只有隊長、副隊長、總務、教練（`ADMIN_ROLES`）或空字串；有管理職就是管理者（`isAdmin` 跟著設成 true），沒有就是一般隊員。每個職務可以有多人，一人只有一個職務。管理頁用下拉選單設定（`setPlayerRole`），球員自己改不了。
 - 出席紀錄的文件 ID 就是 playerId，一人一場一筆。人數統計在前端算，不維護計數器。
 - 重複練球展開成多筆活動文件（`seriesId` 串起來），不存 RRULE。
 - 日期一律以**台北時間**為準（`src/lib/dates.js`）。
@@ -71,7 +72,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 ## 產品原則
 
 - 降低門檻優先：打開就自動登入，不要求填寫不必要的資料。
-- 上線前只需要基本名單（姓名、綽號、背號、是否管理者），其餘由本人在「編輯我的球員卡」補。
+- 上線前只需要基本名單（姓名、綽號、背號、管理職），其餘由本人在「編輯我的球員卡」補。
 - 小孩資料是選填，提示「只有隊員看得到、不必寫全名」。
 - 點將錄不放能力評分，避免程度落差造成尷尬。
 - 位置缺口（沒有投手、捕手、不到 9 人）要明顯提示。

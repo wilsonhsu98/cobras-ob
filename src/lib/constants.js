@@ -21,6 +21,9 @@ export const EVENT_TYPE_LABEL = {
 
 export const JERSEYS = ['練習衣', '條紋衣'];
 
+// 管理職：有任何一個就有管理權限（players.isAdmin）。每個職務可以有多人，一人一個職務
+export const ADMIN_ROLES = ['隊長', '副隊長', '總務', '教練'];
+
 export const EVENT_STATUS = { on: 'on', rain: 'rain' };
 
 export const POSITIONS = ['投手', '捕手', '一壘', '二壘', '三壘', '游擊', '左外野', '中外野', '右外野', '指定打擊'];

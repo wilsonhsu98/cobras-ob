@@ -64,8 +64,9 @@ export const addPlayer = ({ name, nick, number }) =>
     bound: false, createdAt: serverTimestamp(),
   });
 
-export const setPlayerAdmin = (playerId, isAdmin) =>
-  updateDoc(doc(db, COL.players, playerId), { isAdmin });
+// 管理職（隊長、副隊長、總務、教練）；有管理職就是管理者，空字串代表一般隊員
+export const setPlayerRole = (playerId, role) =>
+  updateDoc(doc(db, COL.players, playerId), { role, isAdmin: role !== '' });
 
 export async function unbindPlayer(playerId) {
   const snap = await getDocs(query(collection(db, COL.lineBindings), where('playerId', '==', playerId)));
