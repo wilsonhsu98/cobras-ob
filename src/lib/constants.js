@@ -28,7 +28,7 @@ export const EVENT_STATUS = { on: 'on', rain: 'rain' };
 
 export const POSITIONS = ['投手', '捕手', '一壘手', '內野手', '外野手'];
 export const INFIELD = ['一壘手', '內野手'];
-export const BATS_THROWS = ['右投右打', '右投左打', '左投左打', '左投右打', '右投兩打'];
+export const BATS_THROWS = ['右投右打', '右投左打', '左投左打', '左投右打', '右投兩打', '左投兩打'];
 export const EXPERIENCE = ['完全新手', '重新開始', '國小打過', '壘球多年', '高中棒球隊', '更高層級'];
 
 export const TEAM_NAME = 'CobrasOB';
