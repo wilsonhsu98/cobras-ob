@@ -3,10 +3,14 @@ import { EVENT_TYPE_LABEL } from '../lib/constants';
 import { addDays, parseISO, toISO, todayISO } from '../lib/dates';
 
 // 這個月出現的週末（週六、週日）。已經過去的週不顯示（週日早於今天就算過去）
-function weekendRows(y, m, today) {
+function weekendRows(year, month, today) {
+  // month 可能是 -1（一月的上個月）或 12，先交給 Date 換算成正確的年與月，後面的比對才不會對不上
+  const first = new Date(year, month, 1);
+  const y = first.getFullYear();
+  const m = first.getMonth();
   const last = new Date(y, m + 1, 0);
   const rows = [];
-  let sat = new Date(y, m, 1 - ((new Date(y, m, 1).getDay() + 1) % 7));
+  let sat = new Date(y, m, 1 - ((first.getDay() + 1) % 7));
   while (sat <= last) {
     const sun = addDays(sat, 1);
     // 週六、週日至少有一天在這個月，才算這個月的週末。
