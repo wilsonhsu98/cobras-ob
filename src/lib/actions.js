@@ -30,6 +30,13 @@ export async function createEvents(base, repeatWeeks = 1) {
   return repeatWeeks;
 }
 
+// 只改這一場（重複練球建出的每一場都是獨立的文件）。出席回覆存在活動底下，
+// 改日期、時間也不受影響；狀態（雨天取消）另外用 setEventStatus
+export const updateEvent = (eventId, { type, date, title, start, end, place, opponent, jersey }) =>
+  updateDoc(doc(db, COL.events, eventId), {
+    type, date, dateKey: dateKey(date), title, start, end, place, opponent, jersey, updatedAt: serverTimestamp(),
+  });
+
 export const setEventStatus = (eventId, status) =>
   updateDoc(doc(db, COL.events, eventId), { status });
 

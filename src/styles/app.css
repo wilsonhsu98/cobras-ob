@@ -207,9 +207,12 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .mrow { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .mrow:last-child { border-bottom: 0; }
 .mrow .t { flex: 1; min-width: 10em; }
+.mrow .bag-thumb + .t { min-width: 6em; } /* 有縮圖的列（球具）空間比較緊，文字最小寬度放寬，最窄的手機上「更多」才不會掉到下一行 */
 .mrow .t div { font-size: 13px; color: var(--ink-2); }
-/* 操作按鈕包成一組：同一列放不下時整組一起換到下一行，不會拆開 */
-.mrow .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* 每列只放一顆「更多」，動作都在底部視窗裡（見 RowMenu）；動作按鈕全寬、危險動作與其他隔開 */
+.mrow > .btn { flex: none; }
+.menu { display: grid; gap: 8px; margin-top: 14px; }
+.menu .btn.danger { margin-top: 6px; }
 .mrow select { height: 40px; min-height: 40px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); padding: 6px 10px; font-size: 15px; font-weight: 700; }
 .rank { display: grid; grid-template-columns: 28px 5.5em 1fr 3.4em; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; }
 .rank .bar { height: 12px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }

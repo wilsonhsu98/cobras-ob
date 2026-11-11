@@ -54,6 +54,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 職業 `job`、支持球隊 `favoriteTeam` 是選填的自由文字，由球員本人在「編輯我的球員卡」填寫。
 - 週末月曆不顯示已經過去的週（週日早於今天）；過去的活動在清單的「已結束的活動」裡看。
 - 重複練球展開成多筆活動文件（`seriesId` 串起來），不存 RRULE。
+- 管理頁可以編輯單場活動（`updateEvent`，欄位與新增活動共用 `EventFields`）：**只改那一場**，不連動同系列；狀態（雨天取消）另用 `setEventStatus`；出席回覆存在活動底下，改日期也不受影響。目前只能編輯「即將舉行」的活動；刪除活動會連出席回覆一起刪除。
 - 日期一律以**台北時間**為準（`src/lib/dates.js`）。
 - 集合名稱與狀態值從 `src/lib/constants.js` 引用，不要在各處手打字串。
 - 所有 Firestore 寫入集中在 `src/lib/actions.js`。
@@ -72,6 +73,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 配色取自隊徽：黑（標題列、計分板）、橘（主色）、米白。token 在 `src/styles/tokens.css`，支援深色模式。
 - 首頁主角是「計分板」：黑底、橘色發光數字，顯示下一場日期、是否照常、出席人數。其他元件保持安靜。
 - 大字（基準 17px）、大按鈕（最小約 48px 高），使用者是中年爸爸、常在戶外陽光下操作。
+- 管理頁的列表（活動、球具、球員）每列只放一顆「更多」（`RowMenu`），所有動作在點開的底部視窗裡；危險動作（刪除）放最後、用紅色，刪除前仍有確認。不要在列裡並排多顆按鈕或下拉單，手機放不下會掉行。需要在列上看到的狀態（例如雨天取消）用標籤顯示。
 - 字體：Alfa Slab One（隊名）、Barlow Condensed（數字）、Noto Sans TC（內文）。
 - 介面文字用台灣繁體中文，口語、直接。
 
@@ -95,7 +97,6 @@ npm run build       # 正式建置
 ## 待辦（依優先順序）
 
 1. 實際串接 LINE（dev 專案 + 測試用 LIFF）並驗證綁定流程
-2. 管理頁：編輯單場活動內容（目前只能改雨天狀態或刪除）
-3. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
-4. 尾牙功能：年度出席統計頁、獎項名單
-5. 比賽紀錄（比數、MVP）、照片連結
+2. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
+3. 尾牙功能：年度出席統計頁、獎項名單
+4. 比賽紀錄（比數、MVP）、照片連結

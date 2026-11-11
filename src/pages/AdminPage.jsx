@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ADMIN_ROLES, EVENT_TYPE, EVENT_TYPE_LABEL, JERSEYS } from '../lib/constants';
-import { dowShort, isPastEvent, isWeekend, md } from '../lib/dates';
+import { ADMIN_ROLES, EVENT_TYPE, JERSEYS } from '../lib/constants';
+import { dowShort, isPastEvent, md } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
 import { USE_EMULATOR } from '../lib/firebase';
@@ -14,6 +14,9 @@ import { useAllRsvpYes, useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
 import BagSheet from '../components/BagSheet';
+import EventEditSheet from '../components/EventEditSheet';
+import RowMenu from '../components/RowMenu';
+import EventFields, { validateEvent } from '../components/EventFields';
 
 export default function AdminPage() {
   const { admin } = useAuth();
@@ -50,10 +53,8 @@ function NewEventForm() {
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
   async function submit() {
-    if (!f.date) return setErr('請選擇日期');
-    if (!isWeekend(f.date)) return setErr(`${md(f.date)} 是星期${dowShort(f.date)}，請改選星期六或星期日`);
-    if (!f.title.trim() || !f.place.trim()) return setErr('請填寫標題和地點');
-    if (f.start >= f.end) return setErr('結束時間要晚於開始時間');
+    const problem = validateEvent(f);
+    if (problem) return setErr(problem);
     setErr('');
     const { repeat, ...base } = f;
     const n = repeat ? 4 : 1;
@@ -64,30 +65,7 @@ function NewEventForm() {
     <>
       <h3 className="sec">新增活動</h3>
       <div className="card">
-        <div className="row2">
-          <div className="field">
-            <label htmlFor="ne-type">類型</label>
-            <select id="ne-type" value={f.type} onChange={set('type')}>
-              {Object.entries(EVENT_TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </div>
-          <div className="field"><label htmlFor="ne-date">日期（限六日）</label><input id="ne-date" type="date" value={f.date} onChange={set('date')} /></div>
-        </div>
-        <div className="field"><label htmlFor="ne-title">標題</label><input id="ne-title" value={f.title} onChange={set('title')} /></div>
-        <div className="row2">
-          <div className="field"><label htmlFor="ne-start">開始</label><input id="ne-start" type="time" value={f.start} onChange={set('start')} /></div>
-          <div className="field"><label htmlFor="ne-end">結束</label><input id="ne-end" type="time" value={f.end} onChange={set('end')} /></div>
-        </div>
-        <div className="field"><label htmlFor="ne-place">地點</label><input id="ne-place" value={f.place} onChange={set('place')} /></div>
-        <div className="row2">
-          <div className="field"><label htmlFor="ne-opp">對手（比賽才填）</label><input id="ne-opp" value={f.opponent} onChange={set('opponent')} /></div>
-          <div className="field">
-            <label htmlFor="ne-jersey">球衣</label>
-            <select id="ne-jersey" value={f.jersey} onChange={set('jersey')}>
-              {JERSEYS.map((j) => <option key={j} value={j}>{j}</option>)}
-            </select>
-          </div>
-        </div>
+        <EventFields f={f} set={set} idPrefix="ne" />
         <label className="check"><input type="checkbox" checked={f.repeat} onChange={set('repeat')} /> 每週同一天重複，共 4 週</label>
         {err && <div className="err">{err}</div>}
         <button className="btn" onClick={submit}>新增活動</button>
@@ -99,6 +77,7 @@ function NewEventForm() {
 function EventStatusList() {
   const { events } = useTeamData();
   const run = useRunner();
+  const [editing, setEditing] = useState(null); // 正在編輯的活動
   const upcoming = events.filter((e) => !isPastEvent(e));
   return (
     <>
@@ -107,21 +86,29 @@ function EventStatusList() {
         {upcoming.length === 0 && <div className="hint">沒有即將舉行的活動。</div>}
         {upcoming.map((e) => (
           <div className="mrow" key={e.id}>
-            <div className="t"><b>{md(e.date)}（{dowShort(e.date)}）{e.title}</b><div>{e.start}　{e.place}</div></div>
-            <div className="acts">
-              <button
-                className={`btn small ${e.status === 'rain' ? '' : 'danger'}`}
-                onClick={() => run(() => setEventStatus(e.id, e.status === 'rain' ? 'on' : 'rain'), e.status === 'rain' ? `${md(e.date)} 恢復舉行` : `${md(e.date)} 已標記雨天取消`)}
-              >{e.status === 'rain' ? '恢復舉行' : '雨天取消'}</button>
-              <button
-                className="btn small ghost"
-                aria-label={`刪除 ${md(e.date)} ${e.title}`}
-                onClick={() => { if (confirm(`確定刪除 ${md(e.date)}「${e.title}」？出席紀錄也會一起刪除。`)) run(() => deleteEvent(e.id), '已刪除活動'); }}
-              >刪除</button>
+            <div className="t">
+              <b>{md(e.date)}（{dowShort(e.date)}）{e.title}{e.status === 'rain' && <> <span className="chip rain">雨天取消</span></>}</b>
+              <div>{e.start}　{e.place}</div>
             </div>
+            <RowMenu
+              title={`${md(e.date)} ${e.title}`}
+              actions={[
+                { label: '編輯', onSelect: () => setEditing(e) },
+                {
+                  label: e.status === 'rain' ? '恢復舉行' : '雨天取消',
+                  onSelect: () => run(() => setEventStatus(e.id, e.status === 'rain' ? 'on' : 'rain'), e.status === 'rain' ? `${md(e.date)} 恢復舉行` : `${md(e.date)} 已標記雨天取消`),
+                },
+                {
+                  label: '刪除活動',
+                  danger: true,
+                  onSelect: () => { if (confirm(`確定刪除 ${md(e.date)}「${e.title}」？出席紀錄也會一起刪除。`)) run(() => deleteEvent(e.id), '已刪除活動'); },
+                },
+              ]}
+            />
           </div>
         ))}
       </div>
+      {editing && <EventEditSheet event={editing} onClose={() => setEditing(null)} />}
     </>
   );
 }
@@ -197,13 +184,17 @@ function BagAdmin() {
                 <b>{b.name}</b>
                 <div>{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}　保管：{nickOf(b.holderId)}</div>
               </div>
-              <div className="acts">
-                <button className="btn small ghost" onClick={() => setSheet({ bag: b })}>編輯</button>
-                <button
-                  className="btn small danger"
-                  onClick={() => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); }}
-                >刪除</button>
-              </div>
+              <RowMenu
+                title={b.name}
+                actions={[
+                  { label: '編輯', onSelect: () => setSheet({ bag: b }) },
+                  {
+                    label: '刪除球具',
+                    danger: true,
+                    onSelect: () => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); },
+                  },
+                ]}
+              />
             </div>
           ))}
           {bags.length === 0 && <div className="hint">還沒有球具。</div>}
@@ -249,24 +240,36 @@ function PlayerAdmin() {
           <div className="mrow" key={p.id}>
             <div className="t"><b>{p.nick}</b><div>{p.name}　{p.bound ? '已綁定 LINE' : '尚未綁定'}{p.role ? `　${p.role}` : p.isAdmin ? '　管理者' : ''}</div></div>
             {(p.id !== myId || p.bound) && (
-              <div className="acts">
-                {p.id !== myId && (
-                  <select
-                    aria-label={`${p.nick} 的管理職`}
-                    value={ADMIN_ROLES.includes(p.role) ? p.role : ''}
-                    onChange={(e) => changeRole(p, e.target.value)}
-                  >
-                    <option value="">一般隊員</option>
-                    {ADMIN_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-                  </select>
+              <RowMenu
+                title={p.nick}
+                actions={[
+                  ...(p.bound ? [{
+                    label: '解除 LINE 綁定',
+                    onSelect: () => { if (confirm(`解除 ${p.nick} 的 LINE 綁定？對方下次打開要重新選人。`)) run(() => unbindPlayer(p.id), '已解除綁定'); },
+                  }] : []),
+                  ...(!p.bound && p.id !== myId ? [{
+                    label: '刪除球員',
+                    danger: true,
+                    onSelect: () => { if (confirm(`確定刪除 ${p.nick}？`)) run(() => deletePlayer(p.id), '已刪除'); },
+                  }] : []),
+                ]}
+              >
+                {(close) => p.id !== myId && (
+                  <div className="field">
+                    <label>管理職</label>
+                    <div className="chips" role="group" aria-label={`${p.nick} 的管理職`}>
+                      {['', ...ADMIN_ROLES].map((r) => (
+                        <button
+                          key={r || 'none'}
+                          type="button"
+                          aria-pressed={(ADMIN_ROLES.includes(p.role) ? p.role : '') === r}
+                          onClick={() => { close(); if ((ADMIN_ROLES.includes(p.role) ? p.role : '') !== r) changeRole(p, r); }}
+                        >{r || '一般隊員'}</button>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {p.bound && (
-                  <button className="btn small ghost" onClick={() => { if (confirm(`解除 ${p.nick} 的 LINE 綁定？對方下次打開要重新選人。`)) run(() => unbindPlayer(p.id), '已解除綁定'); }}>解除綁定</button>
-                )}
-                {!p.bound && p.id !== myId && (
-                  <button className="btn small danger" onClick={() => { if (confirm(`確定刪除 ${p.nick}？`)) run(() => deletePlayer(p.id), '已刪除'); }}>刪除</button>
-                )}
-              </div>
+              </RowMenu>
             )}
           </div>
         ))}
