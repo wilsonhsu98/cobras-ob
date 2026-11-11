@@ -53,7 +53,7 @@ export const addPlayer = ({ name, nick, number }) =>
     bound: false, createdAt: serverTimestamp(),
   });
 
-// 管理職（隊長、副隊長、總務、教練）；有管理職就是管理者，空字串代表一般隊員
+// 管理職（ADMIN_ROLES）；有管理職就是管理者，空字串代表一般隊員
 export const setPlayerRole = (playerId, role) =>
   updateDoc(doc(db, COL.players, playerId), { role, isAdmin: role !== '' });
 

@@ -22,8 +22,9 @@ export const EVENT_TYPE_LABEL = {
 
 export const JERSEYS = ['練習衣', '條紋衣'];
 
-// 管理職：有任何一個就有管理權限（players.isAdmin）。每個職務可以有多人，一人一個職務
-export const ADMIN_ROLES = ['隊長', '副隊長', '總務', '教練'];
+// 管理職：有任何一個就有管理權限（players.isAdmin），各職務的權限完全相同，差別只在標示身分。
+// 每個職務可以有多人，一人一個職務。「卸任管理」是已經卸任、但仍保有管理權限的人
+export const ADMIN_ROLES = ['隊長', '副隊長', '總務', '教練', '卸任管理'];
 
 export const EVENT_STATUS = { on: 'on', rain: 'rain' };
 

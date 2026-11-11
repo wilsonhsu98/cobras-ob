@@ -242,7 +242,7 @@ function PlayerAdmin() {
           <div className="field"><label htmlFor="np-no">背號</label><input id="np-no" inputMode="numeric" value={form.number} onChange={set('number')} /></div>
         </div>
         <button className="btn" onClick={add} disabled={!form.name.trim()}>新增球員</button>
-        <p className="hint">新增後，對方打開網頁就能在名單中找到自己完成綁定。有管理職（隊長、副隊長、總務、教練）的人就有管理權限，變更後對方重新打開網頁才會生效。</p>
+        <p className="hint">新增後，對方打開網頁就能在名單中找到自己完成綁定。有管理職（{ADMIN_ROLES.join('、')}）的人就有管理權限，變更後對方重新打開網頁才會生效。</p>
       </div>
       <div className="card" style={{ marginTop: 10 }}>
         {players.map((p) => (

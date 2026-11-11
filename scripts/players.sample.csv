@@ -28,4 +28,4 @@ name,nick,number,isAdmin,role,positions,batsThrows,kid,experience,skill,job,favo
 何志遠,阿遠,17,false,,外野手,左投左打,四年級,重新開始,推打反方向,,
 羅士豪,羅羅,29,false,,,,,,,,
 高國華,國華,31,false,,,,,,,,
-簡永福,福哥,99,false,,,,,,,,
+簡永福,福哥,99,true,卸任管理,,,,,,,

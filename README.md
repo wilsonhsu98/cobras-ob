@@ -29,7 +29,7 @@ npm run seed
 npm run dev
 ```
 
-打開 http://localhost:5173 ，從名單選一位球員即可登入。有管理職的人（宏哥＝隊長、阿明＝副隊長、雄哥＝總務、翰叔與霖霖＝教練）是管理者，可以看到「管理」分頁；選其他人可以體驗一般隊員的畫面。右上角「切換」可以換人。
+打開 http://localhost:5173 ，從名單選一位球員即可登入。有管理職的人（宏哥＝隊長、阿明＝副隊長、雄哥＝總務、翰叔與霖霖＝教練、福哥＝卸任管理）是管理者，可以看到「管理」分頁；選其他人可以體驗一般隊員的畫面。右上角「切換」可以換人。
 
 - Emulator 管理介面：http://localhost:4000 （可以直接看、改 Firestore 資料）
 - 想保留測試資料：改用 `npm run emulators:keep`，關閉時會存到 `emulator-data/`（第一次使用前先 `mkdir emulator-data`）
@@ -112,7 +112,7 @@ Production 用 prod 專案的值；Deploy previews / Branch deploys 用 dev 專�
 
 ### 4. 匯入真實名單
 
-複製 `scripts/players.template.csv` 成 `players.csv`，填入真實名單（至少 `name`、`nick`；有管理職的人 `role` 填 隊長／副隊長／總務／教練，有管理職就有管理權限。之後也可以在「管理」頁調整），然後：
+複製 `scripts/players.template.csv` 成 `players.csv`，填入真實名單（至少 `name`、`nick`；有管理職的人 `role` 填 隊長／副隊長／總務／教練／卸任管理，有管理職就有管理權限，各職務權限相同。之後也可以在「管理」頁調整），然後：
 
 ```bash
 npm run seed:remote -- --project cobras-ob-prod --key ./service-account.json --csv ./players.csv

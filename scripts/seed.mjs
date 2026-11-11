@@ -75,7 +75,7 @@ function toPlayer(row) {
     name: row.name,
     nick: row.nick || row.name,
     number: Number.isFinite(num) ? num : null,
-    // 有管理職（隊長、副隊長、總務、教練）就是管理者；isAdmin 欄位仍可單獨指定
+    // 有管理職（ADMIN_ROLES）就是管理者；isAdmin 欄位仍可單獨指定
     isAdmin: ADMIN_ROLES.includes(role) || String(row.isAdmin).toLowerCase() === 'true',
     role,
     job: row.job || '',
