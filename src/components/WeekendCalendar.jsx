@@ -9,7 +9,10 @@ function weekendRows(y, m, today) {
   let sat = new Date(y, m, 1 - ((new Date(y, m, 1).getDay() + 1) % 7));
   while (sat <= last) {
     const sun = addDays(sat, 1);
-    if (toISO(sun) >= today) rows.push([sat, sun]);
+    // 週六、週日至少有一天在這個月，才算這個月的週末。
+    // 1 號是週一～週五時，包含 1 號的那一週的週末屬於上個月，不能混進來
+    const inMonth = sat.getMonth() === m || sun.getMonth() === m;
+    if (inMonth && toISO(sun) >= today) rows.push([sat, sun]);
     sat = addDays(sat, 7);
   }
   return rows;
