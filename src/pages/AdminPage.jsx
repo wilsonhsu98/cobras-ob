@@ -82,7 +82,7 @@ function NewEventForm() {
         <div className="row2">
           <div className="field"><label htmlFor="ne-opp">對手（比賽才填）</label><input id="ne-opp" value={f.opponent} onChange={set('opponent')} /></div>
           <div className="field">
-            <label htmlFor="ne-jersey">服裝</label>
+            <label htmlFor="ne-jersey">球衣</label>
             <select id="ne-jersey" value={f.jersey} onChange={set('jersey')}>
               {JERSEYS.map((j) => <option key={j} value={j}>{j}</option>)}
             </select>
