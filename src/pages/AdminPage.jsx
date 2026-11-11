@@ -108,15 +108,17 @@ function EventStatusList() {
         {upcoming.map((e) => (
           <div className="mrow" key={e.id}>
             <div className="t"><b>{md(e.date)}（{dowShort(e.date)}）{e.title}</b><div>{e.start}　{e.place}</div></div>
-            <button
-              className={`btn small ${e.status === 'rain' ? '' : 'danger'}`}
-              onClick={() => run(() => setEventStatus(e.id, e.status === 'rain' ? 'on' : 'rain'), e.status === 'rain' ? `${md(e.date)} 恢復舉行` : `${md(e.date)} 已標記雨天取消`)}
-            >{e.status === 'rain' ? '恢復舉行' : '雨天取消'}</button>
-            <button
-              className="btn small ghost"
-              aria-label={`刪除 ${md(e.date)} ${e.title}`}
-              onClick={() => { if (confirm(`確定刪除 ${md(e.date)}「${e.title}」？出席紀錄也會一起刪除。`)) run(() => deleteEvent(e.id), '已刪除活動'); }}
-            >刪除</button>
+            <div className="acts">
+              <button
+                className={`btn small ${e.status === 'rain' ? '' : 'danger'}`}
+                onClick={() => run(() => setEventStatus(e.id, e.status === 'rain' ? 'on' : 'rain'), e.status === 'rain' ? `${md(e.date)} 恢復舉行` : `${md(e.date)} 已標記雨天取消`)}
+              >{e.status === 'rain' ? '恢復舉行' : '雨天取消'}</button>
+              <button
+                className="btn small ghost"
+                aria-label={`刪除 ${md(e.date)} ${e.title}`}
+                onClick={() => { if (confirm(`確定刪除 ${md(e.date)}「${e.title}」？出席紀錄也會一起刪除。`)) run(() => deleteEvent(e.id), '已刪除活動'); }}
+              >刪除</button>
+            </div>
           </div>
         ))}
       </div>
@@ -195,11 +197,13 @@ function BagAdmin() {
                 <b>{b.name}</b>
                 <div>{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}　保管：{nickOf(b.holderId)}</div>
               </div>
-              <button className="btn small ghost" onClick={() => setSheet({ bag: b })}>編輯</button>
-              <button
-                className="btn small danger"
-                onClick={() => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); }}
-              >刪除</button>
+              <div className="acts">
+                <button className="btn small ghost" onClick={() => setSheet({ bag: b })}>編輯</button>
+                <button
+                  className="btn small danger"
+                  onClick={() => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); }}
+                >刪除</button>
+              </div>
             </div>
           ))}
           {bags.length === 0 && <div className="hint">還沒有球具。</div>}
@@ -244,21 +248,25 @@ function PlayerAdmin() {
         {players.map((p) => (
           <div className="mrow" key={p.id}>
             <div className="t"><b>{p.nick}</b><div>{p.name}　{p.bound ? '已綁定 LINE' : '尚未綁定'}{p.role ? `　${p.role}` : p.isAdmin ? '　管理者' : ''}</div></div>
-            {p.id !== myId && (
-              <select
-                aria-label={`${p.nick} 的管理職`}
-                value={ADMIN_ROLES.includes(p.role) ? p.role : ''}
-                onChange={(e) => changeRole(p, e.target.value)}
-              >
-                <option value="">一般隊員</option>
-                {ADMIN_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            )}
-            {p.bound && (
-              <button className="btn small ghost" onClick={() => { if (confirm(`解除 ${p.nick} 的 LINE 綁定？對方下次打開要重新選人。`)) run(() => unbindPlayer(p.id), '已解除綁定'); }}>解除綁定</button>
-            )}
-            {!p.bound && p.id !== myId && (
-              <button className="btn small danger" onClick={() => { if (confirm(`確定刪除 ${p.nick}？`)) run(() => deletePlayer(p.id), '已刪除'); }}>刪除</button>
+            {(p.id !== myId || p.bound) && (
+              <div className="acts">
+                {p.id !== myId && (
+                  <select
+                    aria-label={`${p.nick} 的管理職`}
+                    value={ADMIN_ROLES.includes(p.role) ? p.role : ''}
+                    onChange={(e) => changeRole(p, e.target.value)}
+                  >
+                    <option value="">一般隊員</option>
+                    {ADMIN_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                )}
+                {p.bound && (
+                  <button className="btn small ghost" onClick={() => { if (confirm(`解除 ${p.nick} 的 LINE 綁定？對方下次打開要重新選人。`)) run(() => unbindPlayer(p.id), '已解除綁定'); }}>解除綁定</button>
+                )}
+                {!p.bound && p.id !== myId && (
+                  <button className="btn small danger" onClick={() => { if (confirm(`確定刪除 ${p.nick}？`)) run(() => deletePlayer(p.id), '已刪除'); }}>刪除</button>
+                )}
+              </div>
             )}
           </div>
         ))}

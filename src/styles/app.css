@@ -198,6 +198,8 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .mrow:last-child { border-bottom: 0; }
 .mrow .t { flex: 1; min-width: 10em; }
 .mrow .t div { font-size: 13px; color: var(--ink-2); }
+/* 操作按鈕包成一組：同一列放不下時整組一起換到下一行，不會拆開 */
+.mrow .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .mrow select { min-height: 40px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); padding: 6px 10px; font-size: 15px; font-weight: 700; }
 .rank { display: grid; grid-template-columns: 28px 5.5em 1fr 3.4em; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; }
 .rank .bar { height: 12px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
