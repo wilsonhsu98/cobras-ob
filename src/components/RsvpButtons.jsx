@@ -16,7 +16,7 @@ export default function RsvpButtons({ eventId, playerId, current, disabled }) {
   }
   return (
     <div className="rsvp" role="group" aria-label="出席回覆">
-      {['yes', 'maybe', 'no'].map((k) => (
+      {Object.keys(RSVP_LABEL).map((k) => (
         <button key={k} data-rsvp={k} aria-pressed={current === k} disabled={disabled} onClick={() => choose(k)}>
           {RSVP_LABEL[k]}
         </button>

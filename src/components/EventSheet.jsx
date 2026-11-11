@@ -69,7 +69,7 @@ export default function EventSheet({ eventId, onClose }) {
               <span className={c.yes >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.yes} 人{c.yes >= MIN_PLAYERS ? '' : `，不到 ${MIN_PLAYERS} 人`}</span>
             </div>
           )}
-          {['yes', 'maybe', 'no'].map((k) => {
+          {Object.keys(RSVP_LABEL).map((k) => {
             const list = players.filter((p) => byPlayer.get(p.id)?.rsvp === k);
             return (
               <div key={k}>
@@ -79,7 +79,8 @@ export default function EventSheet({ eventId, onClose }) {
             );
           })}
           {(() => {
-            const list = players.filter((p) => !byPlayer.get(p.id)?.rsvp);
+            // 沒回覆，或舊資料裡殘留已移除的選項（例如「未定」），都算尚未回覆
+            const list = players.filter((p) => !RSVP_LABEL[byPlayer.get(p.id)?.rsvp]);
             return (
               <>
                 <div className="grp">尚未回覆（{list.length}）</div>

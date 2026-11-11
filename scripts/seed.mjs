@@ -241,7 +241,7 @@ async function main() {
           data = { rsvp: 'no' };
         } else if (!past && r < 0.7) {
           const k = Math.random();
-          data = { rsvp: k < 0.6 ? 'yes' : k < 0.8 ? 'maybe' : 'no' };
+          data = { rsvp: k < 0.75 ? 'yes' : 'no' };
         }
         if (data) {
           writer.set(db.doc(`events/${eventId}/attendance/${p.id}`), {

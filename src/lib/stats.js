@@ -4,13 +4,12 @@ import { isPastEvent } from './dates';
 export const heldEvents = (events) => events.filter((e) => isPastEvent(e) && e.status !== 'rain');
 
 export function countRsvp(attendance, totalPlayers) {
-  let yes = 0, maybe = 0, no = 0;
+  let yes = 0, no = 0;
   for (const a of attendance) {
     if (a.rsvp === 'yes') yes++;
-    else if (a.rsvp === 'maybe') maybe++;
     else if (a.rsvp === 'no') no++;
   }
-  return { yes, maybe, no, none: Math.max(0, totalPlayers - yes - maybe - no) };
+  return { yes, no, none: Math.max(0, totalPlayers - yes - no) };
 }
 
 export function coverage(attendance, players) {

@@ -37,13 +37,13 @@ service cloud.firestore {
       }
     }
 
-    // 出席只記錄回覆（會到／未定／不會到），不做當日簽到
+    // 出席只記錄回覆（會到／不會到），不做「未定」，也不做當日簽到
     function validAttendance(eventId, playerId) {
       let d = request.resource.data;
       return d.playerId == playerId
         && d.eventId == eventId
         && d.keys().hasOnly(['playerId', 'eventId', 'rsvp', 'updatedAt'])
-        && (d.get('rsvp', null) == null || d.rsvp in ['yes', 'maybe', 'no']);
+        && (d.get('rsvp', null) == null || d.rsvp in ['yes', 'no']);
     }
 
     // 出席統計用的 collectionGroup 查詢

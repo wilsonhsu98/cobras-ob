@@ -39,7 +39,7 @@ events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
                               type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey,
                               status(on|rain), seriesId
 events/{eventId}/attendance/{playerId}
-                              playerId, eventId, rsvp(yes|maybe|no|null), updatedAt
+                              playerId, eventId, rsvp(yes|no|null), updatedAt
 bags/{bagId}                  name, items[{name,qty}], holderId
 bagPhotos/{bagId}             dataUrl, updatedAt   （球具照片，文件 ID 同 bagId；另放一個集合，只有球具頁與管理頁訂閱）
 handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, createdAt   （保管紀錄，建立後不可改）
@@ -49,6 +49,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 守備位置 `positions[]` 只有投手、捕手、一壘手、內野手、外野手（`POSITIONS`），可複選；點將錄的「內野」篩選包含一壘手與內野手。
 - 管理職 `role` 只有隊長、副隊長、總務、教練、卸任管理（`ADMIN_ROLES`）或空字串；有管理職就是管理者（`isAdmin` 跟著設成 true），沒有就是一般隊員。各管理職的權限完全相同、沒有分級，差別只在標示身分；卸任管理是已卸任但仍保有管理權限的人。每個職務可以有多人，一人只有一個職務。管理頁用下拉選單設定（`setPlayerRole`），球員自己改不了。
 - 出席紀錄的文件 ID 就是 playerId，一人一場一筆。人數統計在前端算，不維護計數器。
+- 出席回覆只有「會到」「不會到」，**不做「未定」**（模稜兩可、統計也不好用）；還沒回覆的人算「尚未回覆」。舊資料裡殘留的 `maybe` 也當成尚未回覆。
 - **不做當日簽到**：實務上出席全憑自由心證，簽到只會多一道手續。出席統計一律以回覆「會到」為準：管理頁的出席排行與球員卡的出席欄都是「會到次數／已舉辦活動數」，已舉辦＝日期已過且沒有因雨取消（`heldEvents`）。
 - 職業 `job`、支持球隊 `favoriteTeam` 是選填的自由文字，由球員本人在「編輯我的球員卡」填寫。
 - 週末月曆不顯示已經過去的週（週日早於今天）；過去的活動在清單的「已結束的活動」裡看。

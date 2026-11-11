@@ -9,8 +9,9 @@ export const COL = {
   lineBindings: 'lineBindings',
 };
 
-export const RSVP = { yes: 'yes', maybe: 'maybe', no: 'no' };
-export const RSVP_LABEL = { yes: '會到', maybe: '未定', no: '不會到' };
+// 出席回覆只有「會到」「不會到」，不做「未定」；還沒回覆的人另外算「尚未回覆」
+export const RSVP = { yes: 'yes', no: 'no' };
+export const RSVP_LABEL = { yes: '會到', no: '不會到' };
 
 // 比賽依用球分三種：硬式棒球、軟式棒球（rubberball）、壘球
 export const EVENT_TYPE = {
