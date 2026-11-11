@@ -90,6 +90,7 @@ h3.sec { font-size: 18px; font-weight: 700; margin: 26px 0 10px; }
 .ev-date span { font-size: 13px; color: var(--ink-2); }
 .ev-body { flex: 1; min-width: 0; }
 .ev-title { font-weight: 700; font-size: 17px; }
+.vs { display: inline-block; max-width: 100%; } /* 「vs 對手」當成一個整體，放不下時整段換行 */
 .ev-meta { font-size: 14px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip { display: inline-block; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 1px 9px; margin-right: 4px; vertical-align: 2px; }
 .chip.t-practice { background: var(--accent-soft); color: var(--accent-text); }

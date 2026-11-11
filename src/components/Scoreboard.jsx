@@ -1,9 +1,9 @@
 import { EVENT_TYPE_LABEL } from '../lib/constants';
 import { dowLabel, md } from '../lib/dates';
-import { eventTitle } from '../lib/eventText';
 import { countRsvp } from '../lib/stats';
 import { useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
+import EventTitle from './EventTitle';
 import RsvpButtons from './RsvpButtons';
 
 export default function Scoreboard({ event, onOpen }) {
@@ -24,7 +24,7 @@ export default function Scoreboard({ event, onOpen }) {
           <div className="board-when">{dowLabel(event.date)}<br /><span className="num">{event.start}</span></div>
           <img className="board-logo" src="/logo.webp" alt="" />
         </div>
-        <div className="board-title">{eventTitle(event)}</div>
+        <div className="board-title"><EventTitle event={event} /></div>
         <div className="board-place">{event.place}</div>
         <div className="board-cells">
           <div><span className="num">{c.yes}</span><span>會到</span></div>

@@ -1,6 +1,6 @@
 import { EVENT_TYPE_LABEL, RSVP_LABEL } from '../lib/constants';
 import { dowLabel, parseISO } from '../lib/dates';
-import { eventTitle } from '../lib/eventText';
+import EventTitle from './EventTitle';
 
 export default function EventRow({ event, myRsvp, past, onOpen }) {
   const rain = event.status === 'rain';
@@ -15,7 +15,7 @@ export default function EventRow({ event, myRsvp, past, onOpen }) {
           <span className={`chip t-${event.type}`}>{EVENT_TYPE_LABEL[event.type]}</span>
           {rain && <span className="chip rain">雨天取消</span>}
         </div>
-        <div className="ev-title">{eventTitle(event)}</div>
+        <div className="ev-title"><EventTitle event={event} /></div>
         <div className="ev-meta">{event.start}–{event.end}　{event.place}</div>
       </div>
       {past

@@ -1,9 +1,9 @@
 import { EVENT_TYPE_LABEL, MIN_PLAYERS, RSVP_LABEL } from '../lib/constants';
 import { dowLabel, isPastEvent, md } from '../lib/dates';
-import { eventTitle } from '../lib/eventText';
 import { countRsvp, coverage } from '../lib/stats';
 import { useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
+import EventTitle from './EventTitle';
 import RsvpButtons from './RsvpButtons';
 import Sheet from './Sheet';
 
@@ -38,7 +38,7 @@ export default function EventSheet({ eventId, onClose }) {
 
   return (
     <Sheet label={event.title} onClose={onClose} head={head}>
-      <h2>{eventTitle(event)}</h2>
+      <h2><EventTitle event={event} /></h2>
       {rain && <div className="banner">這場活動因雨取消</div>}
       <dl className="kv">
         <dt>日期</dt><dd>{md(event.date)}（{dowLabel(event.date)}）</dd>
