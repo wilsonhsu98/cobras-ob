@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ADMIN_ROLES, EVENT_TYPE, JERSEYS } from '../lib/constants';
+import { ADMIN_ROLES, DEFAULT_JERSEY, EVENT_TYPE } from '../lib/constants';
 import { dowShort, isPastEvent, md, todayISO } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
@@ -47,7 +47,7 @@ function NewEventForm() {
   const run = useRunner();
   const [f, setF] = useState({
     type: EVENT_TYPE.practice, date: '', title: '週日練球', start: '14:00', end: '17:00',
-    place: '社區國小棒球場', opponent: '', jersey: JERSEYS[0], repeat: false,
+    place: '社區國小棒球場', opponent: '', jersey: DEFAULT_JERSEY, note: '', repeat: false,
   });
   const [err, setErr] = useState('');
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
@@ -58,7 +58,7 @@ function NewEventForm() {
     setErr('');
     const { repeat, ...base } = f;
     const n = repeat ? 4 : 1;
-    await run(() => createEvents({ ...base, title: base.title.trim(), place: base.place.trim(), opponent: base.opponent.trim() }, n), `已新增 ${n} 場活動`);
+    await run(() => createEvents({ ...base, title: base.title.trim(), place: base.place.trim(), opponent: base.opponent.trim(), note: base.note.trim() }, n), `已新增 ${n} 場活動`);
   }
 
   return (

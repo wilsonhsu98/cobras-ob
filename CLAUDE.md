@@ -40,7 +40,7 @@
 players/{playerId}            name, nick, number, isAdmin, role, positions[], batsThrows,
                               relation, experience, skill, job, favoriteTeam, bound, pictureUrl
 events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
-                              type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey,
+                              type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey, note,
                               status(on|rain), seriesId
 events/{eventId}/attendance/{playerId}
                               playerId, eventId, rsvp(yes|no|null), updatedAt
@@ -60,6 +60,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 重複練球展開成多筆活動文件（`seriesId` 串起來），不存 RRULE。
 - 管理頁可以編輯單場活動（`updateEvent`，欄位與新增活動共用 `EventFields`）：**只改那一場**，不連動同系列；狀態（雨天取消）另用 `setEventStatus`；出席回覆存在活動底下，改日期也不受影響。目前只能編輯「即將舉行」的活動；刪除活動會連出席回覆一起刪除。
 - 日期一律以**台北時間**為準（`src/lib/dates.js`）。
+- 球衣 `jersey` 的選項在 `JERSEYS`（條紋衣、練習衣、隨意穿；新增活動預設練習衣，`DEFAULT_JERSEY`）。活動備註 `note` 是選填的自由文字（可多行），管理者在新增／編輯活動時填；有填才會顯示在活動視窗（「備註」）與公告文字（📝）。重複練球建出的每一場都會帶同一份備註。
 - 集合名稱與狀態值從 `src/lib/constants.js` 引用，不要在各處手打字串。
 - 所有 Firestore 寫入集中在 `src/lib/actions.js`。
 

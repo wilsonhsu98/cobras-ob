@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { JERSEYS } from '../lib/constants';
+import { DEFAULT_JERSEY } from '../lib/constants';
 import { updateEvent } from '../lib/actions';
 import { useToast } from '../hooks/useToast';
 import EventFields, { validateEvent } from './EventFields';
@@ -16,7 +16,8 @@ export default function EventEditSheet({ event, onClose }) {
     end: event.end,
     place: event.place,
     opponent: event.opponent || '',
-    jersey: event.jersey || JERSEYS[0],
+    jersey: event.jersey || DEFAULT_JERSEY,
+    note: event.note || '',
   }));
   const [err, setErr] = useState('');
   const [saving, setSaving] = useState(false);
@@ -28,7 +29,7 @@ export default function EventEditSheet({ event, onClose }) {
     setErr('');
     setSaving(true);
     try {
-      await updateEvent(event.id, { ...f, title: f.title.trim(), place: f.place.trim(), opponent: f.opponent.trim() });
+      await updateEvent(event.id, { ...f, title: f.title.trim(), place: f.place.trim(), opponent: f.opponent.trim(), note: f.note.trim() });
       toast('活動已更新');
       onClose();
     } catch (e) {

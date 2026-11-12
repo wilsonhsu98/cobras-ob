@@ -11,6 +11,7 @@ export function buildAnnouncement(event, attendance, players, link) {
   lines.push(`📍 ${event.place}`);
   if (event.opponent) lines.push(`🆚 ${event.opponent}`);
   if (event.jersey) lines.push(`👕 ${event.jersey}`);
+  if (event.note) lines.push(`📝 ${event.note}`);
   if (event.status !== 'rain') {
     const c = countRsvp(attendance, players.length);
     let s = `目前會到 ${c.yes} 人，還有 ${c.none} 位沒回覆`;

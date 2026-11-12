@@ -32,6 +32,10 @@ export default function EventFields({ f, set, idPrefix }) {
           </select>
         </div>
       </div>
+      <div className="field">
+        <label htmlFor={id('note')}>備註（選填）</label>
+        <textarea id={id('note')} className="note" rows={3} value={f.note} onChange={set('note')} placeholder="例如：記得帶水、9:30 集合" />
+      </div>
     </>
   );
 }

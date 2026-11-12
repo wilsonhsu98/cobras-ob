@@ -220,6 +220,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .field input, .field select, .field textarea { display: block; width: 100%; min-width: 0; max-width: 100%; min-height: 48px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); padding: 8px 12px; font-size: 17px; }
 .field input, .field select { height: 48px; } /* 單行欄位（含下拉單）固定同高；iOS 的下拉單預設會比輸入框矮 */
 .field textarea { min-height: 200px; line-height: 1.6; font-size: 15px; }
+.field textarea.note { min-height: 0; font-size: 17px; line-height: 1.5; resize: vertical; } /* 活動備註：三行高，字級跟其他欄位一致 */
 /* iOS Safari 的日期、時間欄位有很大的內建寬度，要關掉原生外觀才會乖乖照欄寬走，並靠左對齊 */
 .field select, .field input[type="date"], .field input[type="time"] { -webkit-appearance: none; appearance: none; }
 .field input[type="date"], .field input[type="time"] { text-align: left; }
@@ -300,6 +301,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .kv.wide { grid-template-columns: 6.5em 1fr; }
 .kv dt { color: var(--ink-2); font-size: 15px; }
 .kv dd { margin: 0; font-weight: 500; }
+.kv dd.note { white-space: pre-wrap; overflow-wrap: anywhere; }
 .kv a { color: var(--accent-text); font-weight: 700; }
 .banner { background: var(--danger-soft); color: var(--danger); border-radius: 12px; padding: 10px 14px; font-weight: 700; margin-bottom: 12px; }
 .cover { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }

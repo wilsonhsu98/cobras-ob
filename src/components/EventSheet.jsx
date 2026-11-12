@@ -51,6 +51,7 @@ export default function EventSheet({ eventId, onClose }) {
         <dt>地點</dt><dd>{event.place}<br /><a href={mapUrl(event.place)} target="_blank" rel="noopener noreferrer">開啟 Google 地圖</a></dd>
         {event.opponent && <><dt>對手</dt><dd>{event.opponent}</dd></>}
         <dt>球衣</dt><dd>{event.jersey || '—'}</dd>
+        {event.note && <><dt>備註</dt><dd className="note">{event.note}</dd></>}
       </dl>
 
       {past ? (
