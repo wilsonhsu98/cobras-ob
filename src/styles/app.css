@@ -224,6 +224,19 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .field select, .field input[type="date"], .field input[type="time"] { -webkit-appearance: none; appearance: none; }
 .field input[type="date"], .field input[type="time"] { text-align: left; }
 .field input::-webkit-date-and-time-value { text-align: left; min-height: 1.2em; }
+/* Chrome 原生的日期、時間小圖示顏色不固定（有的版本是黑的），改成自己畫：用遮罩挖出形狀、填跟文字一樣的顏色，深淺色都看得到 */
+.field input[type="date"]::-webkit-calendar-picker-indicator, .field input[type="time"]::-webkit-calendar-picker-indicator {
+  width: 22px; height: 22px; padding: 0; cursor: pointer; opacity: 1;
+  background: var(--ink); -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 10h17'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 10h17'/%3E%3C/svg%3E");
+}
+.field input[type="time"]::-webkit-calendar-picker-indicator {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5.5l3.5 2'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5.5l3.5 2'/%3E%3C/svg%3E");
+}
 .field select {
   padding-right: 38px; background-repeat: no-repeat; background-position: right 12px center; background-size: 14px 14px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23857b70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
