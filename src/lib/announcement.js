@@ -14,7 +14,7 @@ export function buildAnnouncement(event, attendance, players, link) {
   if (event.note) lines.push(`📝 ${event.note}`);
   if (event.status !== 'rain') {
     const c = countRsvp(attendance, players.length);
-    let s = `目前會到 ${c.yes} 人，還有 ${c.none} 位沒回覆`;
+    let s = `目前會到 ${c.coming} 人${c.late ? `（其中 ${c.late} 人會遲到）` : ''}，還有 ${c.none} 位沒回覆`;
     if (event.type !== 'party') {
       const cv = coverage(attendance, players);
       const lack = [];

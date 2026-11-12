@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ADMIN_ROLES, DEFAULT_JERSEY, EVENT_TYPE } from '../lib/constants';
+import { ADMIN_ROLES, ATTEND_WEIGHT, DEFAULT_JERSEY, EVENT_TYPE } from '../lib/constants';
 import { dowShort, isPastEvent, md, todayISO } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useBagPhotos } from '../hooks/useBagPhotos';
 import { heldEvents } from '../lib/stats';
-import { useAllRsvpYes, useEventAttendance } from '../hooks/useEventAttendance';
+import { useAllAttended, useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
 import BagSheet from '../components/BagSheet';
@@ -280,7 +280,7 @@ function PlayerAdmin() {
 
 function AttendanceRanking() {
   const { events, players } = useTeamData();
-  const { data: yes } = useAllRsvpYes();
+  const { data: attended } = useAllAttended();
   // 預設聚焦今年（今年還沒有已舉辦的活動也留在選項裡），也可以改選有活動的其他年份，或看全部累計
   const thisYear = todayISO().slice(0, 4);
   const [year, setYear] = useState(thisYear);
@@ -289,7 +289,7 @@ function AttendanceRanking() {
   const heldIds = new Set(held.filter((e) => year === 'all' || e.date.startsWith(year)).map((e) => e.id));
   const total = heldIds.size;
   const counts = new Map();
-  for (const a of yes) if (heldIds.has(a.eventId)) counts.set(a.playerId, (counts.get(a.playerId) || 0) + 1);
+  for (const a of attended) if (heldIds.has(a.eventId)) counts.set(a.playerId, (counts.get(a.playerId) || 0) + (ATTEND_WEIGHT[a.rsvp] ?? 0));
   const ranks = players.map((p) => ({ p, n: counts.get(p.id) || 0 })).sort((a, b) => b.n - a.n).slice(0, 10);
 
   return (
@@ -303,7 +303,7 @@ function AttendanceRanking() {
       </div>
       <div className="card">
         {total === 0 && <div className="hint">{year === 'all' ? '還沒有已舉辦的活動。' : `${year} 年還沒有已舉辦的活動。`}</div>}
-        {total > 0 && <div className="hint" style={{ marginBottom: 8 }}>會到／舉辦活動數，以回覆「會到」計算，因雨取消的活動不算。尾牙全勤獎參考。</div>}
+        {total > 0 && <div className="hint" style={{ marginBottom: 8 }}>出席／舉辦活動數：回覆「會到」算 1、「會遲到」算 0.5，因雨取消的活動不算。尾牙全勤獎參考。</div>}
         {total > 0 && ranks.map((r, i) => (
           <div className="rank" key={r.p.id}>
             <span className="num">{i + 1}</span>

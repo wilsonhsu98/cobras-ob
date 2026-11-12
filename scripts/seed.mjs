@@ -235,13 +235,15 @@ async function main() {
         if (p.id === 'p001' && !past) continue; // 留給你自己按按看
         const r = Math.random();
         let data = null;
-        if (past && r < 0.64) {
+        if (past && r < 0.6) {
           data = { rsvp: 'yes' };
+        } else if (past && r < 0.66) {
+          data = { rsvp: 'late' };
         } else if (past && r < 0.74) {
           data = { rsvp: 'no' };
         } else if (!past && r < 0.7) {
           const k = Math.random();
-          data = { rsvp: k < 0.75 ? 'yes' : 'no' };
+          data = { rsvp: k < 0.65 ? 'yes' : k < 0.75 ? 'late' : 'no' };
         }
         if (data) {
           writer.set(db.doc(`events/${eventId}/attendance/${p.id}`), {

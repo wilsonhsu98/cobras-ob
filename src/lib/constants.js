@@ -10,9 +10,13 @@ export const COL = {
   lineBindings: 'lineBindings',
 };
 
-// 出席回覆只有「會到」「不會到」，不做「未定」；還沒回覆的人另外算「尚未回覆」
-export const RSVP = { yes: 'yes', no: 'no' };
-export const RSVP_LABEL = { yes: '會到', no: '不會到' };
+// 出席回覆有「會到」「會遲到」「不會到」，不做「未定」；還沒回覆的人另外算「尚未回覆」。
+// 物件的 key 順序就是按鈕與名單分組的順序
+export const RSVP = { yes: 'yes', late: 'late', no: 'no' };
+export const RSVP_LABEL = { yes: '會到', late: '會遲到', no: '不會到' };
+// 出席統計的權重：會到算 1 次、會遲到算 0.5 次，其他不算
+export const ATTEND_WEIGHT = { yes: 1, late: 0.5 };
+export const ATTEND_RSVPS = Object.keys(ATTEND_WEIGHT);
 
 // 比賽依用球分三種：硬式棒球、軟式棒球（rubberball）、壘球
 export const EVENT_TYPE = {

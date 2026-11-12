@@ -1,4 +1,4 @@
-import { EVENT_TYPE_LABEL, RSVP_LABEL } from '../lib/constants';
+import { ATTEND_WEIGHT, EVENT_TYPE_LABEL, RSVP_LABEL } from '../lib/constants';
 import { dowLabel, parseISO } from '../lib/dates';
 import EventTitle from './EventTitle';
 
@@ -19,7 +19,7 @@ export default function EventRow({ event, myRsvp, past, onOpen }) {
         <div className="ev-meta">{event.start}–{event.end}　{event.place}</div>
       </div>
       {past
-        ? <span className="pill">{myRsvp?.rsvp === 'yes' ? RSVP_LABEL.yes : '—'}</span>
+        ? <span className="pill">{ATTEND_WEIGHT[myRsvp?.rsvp] ? RSVP_LABEL[myRsvp.rsvp] : '—'}</span>
         : <span className={`pill ${RSVP_LABEL[myRsvp?.rsvp] ? myRsvp.rsvp : ''}`}>{RSVP_LABEL[myRsvp?.rsvp] || '未回覆'}</span>}
     </button>
   );

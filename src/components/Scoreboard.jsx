@@ -28,6 +28,7 @@ export default function Scoreboard({ event, onOpen }) {
         <div className="board-place">{event.place}</div>
         <div className="board-cells">
           <div><span className="num">{c.yes}</span><span>會到</span></div>
+          <div><span className="num">{c.late}</span><span>會遲到</span></div>
           <div><span className="num">{c.no}</span><span>不會到</span></div>
           <div><span className="num">{c.none}</span><span>未回覆</span></div>
         </div>

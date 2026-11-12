@@ -8,7 +8,7 @@ const FULLWIDTH_DIGITS = '０１２３４５６７８９';
 const jerseyText = (n) => (!Number.isInteger(n) ? '—' : n < 10 ? FULLWIDTH_DIGITS[n] : String(n));
 
 /**
- * 全螢幕的出席名冊（管理者）：依「會到／不會到／尚未回覆」分區，列出每個人的背號、全名、守位。
+ * 全螢幕的出席名冊（管理者）：依「會到／會遲到／不會到／尚未回覆」分區，列出每個人的背號、全名、守位。
  * 給隊長到場後對照著填紙本的先發名單用，所以字體大。全名後面空一格接綽號（現場都叫綽號，
  * 對得上人），不放能力。
  */
@@ -18,6 +18,7 @@ export default function LineupSheet({ event, players, attendance, onClose }) {
   const groupOf = (p) => (RSVP_LABEL[rsvpOf.get(p.id)] ? rsvpOf.get(p.id) : 'none');
   const groups = [
     { key: RSVP.yes, title: RSVP_LABEL[RSVP.yes] },
+    { key: RSVP.late, title: RSVP_LABEL[RSVP.late] },
     { key: RSVP.no, title: RSVP_LABEL[RSVP.no] },
     { key: 'none', title: '尚未回覆' },
   ].map((g) => ({ ...g, list: players.filter((p) => groupOf(p) === g.key) }));

@@ -1,5 +1,5 @@
-import { attendanceByYear, heldEvents } from '../lib/stats';
-import { usePlayerRsvpYes } from '../hooks/useEventAttendance';
+import { attendanceByYear, attendWeights, heldEvents } from '../lib/stats';
+import { usePlayerAttended } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import Avatar from './Avatar';
 import Sheet from './Sheet';
@@ -7,9 +7,9 @@ import Sheet from './Sheet';
 export default function PlayerSheet({ playerId, onClose, onEdit }) {
   const { playerMap, events, me } = useTeamData();
   const player = playerMap.get(playerId);
-  const { data: yes } = usePlayerRsvpYes(playerId);
+  const { data: attended } = usePlayerAttended(playerId);
   if (!player) return null;
-  const byYear = attendanceByYear(heldEvents(events), new Set(yes.map((a) => a.eventId)));
+  const byYear = attendanceByYear(heldEvents(events), attendWeights(attended));
 
   return (
     <Sheet label={player.nick} onClose={onClose}>

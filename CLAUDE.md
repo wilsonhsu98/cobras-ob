@@ -43,7 +43,7 @@ events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
                               type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey, note,
                               status(on|rain), seriesId
 events/{eventId}/attendance/{playerId}
-                              playerId, eventId, rsvp(yes|no|null), updatedAt
+                              playerId, eventId, rsvp(yes|late|no|null), updatedAt
 bags/{bagId}                  name, items[{name,qty}], holderId
 bagPhotos/{bagId}             dataUrl, updatedAt   （球具照片，文件 ID 同 bagId；另放一個集合，只有球具頁與管理頁訂閱）
 playerPhotos/{playerId}       dataUrl, updatedAt   （球員自己上傳的頭像，文件 ID 同 playerId；160px 方形 JPEG，約 5～10KB）
@@ -54,8 +54,8 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 守備位置 `positions[]` 只有投手、捕手、一壘手、內野手、外野手（`POSITIONS`），可複選；點將錄的「內野」篩選包含一壘手與內野手。
 - 管理職 `role` 只有隊長、副隊長、總務、教練、卸任管理（`ADMIN_ROLES`）或空字串；有管理職就是管理者（`isAdmin` 跟著設成 true），沒有就是一般隊員。各管理職的權限完全相同、沒有分級，差別只在標示身分；卸任管理是已卸任但仍保有管理權限的人。每個職務可以有多人，一人只有一個職務。管理頁用下拉選單設定（`setPlayerRole`），球員自己改不了。
 - 出席紀錄的文件 ID 就是 playerId，一人一場一筆。人數統計在前端算，不維護計數器。
-- 出席回覆只有「會到」「不會到」，**不做「未定」**（模稜兩可、統計也不好用）；還沒回覆的人算「尚未回覆」。舊資料裡殘留的 `maybe` 也當成尚未回覆。
-- **不做當日簽到**：實務上出席全憑自由心證，簽到只會多一道手續。出席統計一律以回覆「會到」為準，是「會到次數／已舉辦活動數」，已舉辦＝日期已過且沒有因雨取消（`heldEvents`）。管理頁的出席排行標題右邊有年份下拉單，預設今年（也可選有活動的其他年份或「全部年份」）；球員卡的出席欄依年度分行列出（`2026 2/4 (50%)`，年份由小到大，`attendanceByYear`）。
+- 出席回覆有「會到」`yes`、「會遲到」`late`、「不會到」`no` 三種，**不做「未定」**（模稜兩可、統計也不好用）；還沒回覆的人算「尚未回覆」。舊資料裡殘留的 `maybe` 也當成尚未回覆。按鈕與名單分組的順序就是 `RSVP_LABEL` 的 key 順序。
+- **不做當日簽到**：實務上出席全憑自由心證，簽到只會多一道手續。出席統計一律以回覆為準，**會到算 1、會遲到算 0.5**（權重在 `constants.js` 的 `ATTEND_WEIGHT`），是「出席加權次數／已舉辦活動數」（會遲到出現小數，例如 `2.5/4`），已舉辦＝日期已過且沒有因雨取消（`heldEvents`）。出席統計的查詢是 `rsvp in ['yes','late']`（`useAllAttended`、`usePlayerAttended`），沿用原本的 collection group 索引。**活動當天的人數（計分板、活動視窗、公告）算人頭、不加權**：會遲到的人也算會來，「會到 N 人」＝會到＋會遲到，另外標出遲到幾人；投手、捕手缺口也把會遲到的人算進去。管理頁的出席排行標題右邊有年份下拉單，預設今年（也可選有活動的其他年份或「全部年份」）；球員卡的出席欄依年度分行列出（`2026 2/4 (50%)`，年份由小到大，`attendanceByYear`）。
 - 職業 `job`、支持球隊 `favoriteTeam` 是選填的自由文字，由球員本人在「編輯我的球員卡」填寫。
 - 週末月曆不顯示已經過去的週（週日早於今天）；過去的活動在清單的「已結束的活動」裡看。
 - 重複練球展開成多筆活動文件（`seriesId` 串起來），不存 RRULE。
@@ -68,7 +68,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 ## 權限（firestore.rules）
 
 - 已通過 LINE 驗證但尚未綁定的人只能讀 `players`（用來選自己）。
-- 球員只能改自己的出席紀錄（只有 `rsvp`）、自己的球員卡（不能改 `isAdmin`、`bound`、`pictureUrl`）。
+- 球員只能改自己的出席紀錄（只有 `rsvp`，值為 `yes`／`late`／`no`）、自己的球員卡（不能改 `isAdmin`、`bound`、`pictureUrl`）。
 - `pictureUrl`（LINE 頭像網址）只有 `line-auth` Function 在登入時寫入，來源是 LINE ID token 的 `picture`；解除綁定時清掉。已綁定的人每次打開 app 都會在背景重新換 token，所以在 LINE 換頭像後重新打開就會更新（不是即時）。
 - 球員也可以在「編輯我的球員卡」自己上傳頭像（`playerPhotos`，只有本人能寫、`dataUrl` 不超過 8 萬字元；本人或管理者能刪）。Avatar 的優先順序：自己上傳的 → LINE 頭像 → 姓氏，其中一個載入失敗就換下一個。LINE 沒有開放 API 讓第三方改使用者的 LINE 頭像，所以**無法把自訂頭像同步回 LINE**；「改回用 LINE 頭像」鈕做的是刪掉自己上傳的那張，並呼叫一次 `exchange({ silent: true })` 讓 `line-auth` 把最新的 LINE 頭像寫回。`playerPhotos` 由 `TeamDataProvider` 訂閱一次（全隊約 30 張、各約 10KB），**不算進 loading／error**（頭像只是裝飾）。解除綁定、刪除球員時要一併刪掉 `playerPhotos`，免得換人綁同一個位子時還看到前一個人的照片。
 - 球具保管一步完成、沒有輪值：任何成員都能接手（只能把 `holderId` 改成自己，不需原保管人同意）；指定別人保管只有管理者。每次換手寫一筆 `handoffs`（`byId` 不等於 `toId` 代表是管理者指定）。
@@ -95,7 +95,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 - 「與眼鏡蛇的關係」（`relation`）是選填的自由文字，例如「小孩五年級」「少棒校友」「朋友介紹」，由本人在「編輯我的球員卡」填寫；提示「只有隊員看得到、有小孩不必寫全名」。原本欄位叫 `kid`（小孩），但不是每個人都因小孩而來，所以改名；prod 還沒匯入名單時改最省事，之後再改就要寫遷移。球員視窗的標籤較長，所以 `.kv` 加 `wide` 變體放寬標籤欄。
 - 點將錄不放能力評分，避免程度落差造成尷尬。
 - 位置缺口（沒有投手、捕手、不到 9 人）要明顯提示。
-- 活動視窗（即將舉行的活動）的「出席名單」標題旁，**管理者**有「全螢幕名單」按鈕（`LineupSheet.jsx`）：蓋滿整個畫面，分「會到／不會到／尚未回覆」三區，每區兩欄（依背號由左到右、由上到下）列出背號、全名、守位，全名後面空一格接綽號（現場都叫綽號，對得上人）。背號用等寬字體，個位數改成全形數字（２），並放在固定寬度（兩個字寬）的格子裡置中，個位數和兩位數的中心線才對得齊（不另外載入 CJK 等寬字型）。用途是隊長到場後對照著填紙本的先發名單，所以字大、不放能力；一般隊員看不到這顆按鈕。`Sheet` 有 `full` 屬性可做全螢幕版，疊兩層視窗時 Esc 只關最上面那層。
+- 活動視窗（即將舉行的活動）的「出席名單」標題旁，**管理者**有「全螢幕名單」按鈕（`LineupSheet.jsx`）：蓋滿整個畫面，分「會到／會遲到／不會到／尚未回覆」四區，每區兩欄（依背號由左到右、由上到下）列出背號、全名、守位，全名後面空一格接綽號（現場都叫綽號，對得上人）。背號用等寬字體，個位數改成全形數字（２），並放在固定寬度（兩個字寬）的格子裡置中，個位數和兩位數的中心線才對得齊（不另外載入 CJK 等寬字型）。用途是隊長到場後對照著填紙本的先發名單，所以字大、不放能力；一般隊員看不到這顆按鈕。`Sheet` 有 `full` 屬性可做全螢幕版，疊兩層視窗時 Esc 只關最上面那層。
 
 ## 開發指令
 

@@ -26,7 +26,6 @@ export default function EventSheet({ eventId, onClose }) {
   const mine = me ? byPlayer.get(me.id) : null;
   const c = countRsvp(attendance, players.length);
   const cv = coverage(attendance, players);
-  const yesList = players.filter((p) => byPlayer.get(p.id)?.rsvp === 'yes');
 
   const head = (
     <>
@@ -56,8 +55,23 @@ export default function EventSheet({ eventId, onClose }) {
 
       {past ? (
         <>
-          <h3 className="sec">會到（{yesList.length} 人）</h3>
-          <Names list={yesList} empty="沒有人回覆會到" />
+          {(() => {
+            // 已結束的活動只看實際有來的人：會到、會遲到（沒人會遲到就不顯示那一組）
+            const yesList = players.filter((p) => byPlayer.get(p.id)?.rsvp === 'yes');
+            const lateList = players.filter((p) => byPlayer.get(p.id)?.rsvp === 'late');
+            return (
+              <>
+                <h3 className="sec">會到（{yesList.length} 人）</h3>
+                <Names list={yesList} empty="沒有人回覆會到" />
+                {lateList.length > 0 && (
+                  <>
+                    <h3 className="sec">會遲到（{lateList.length} 人）</h3>
+                    <Names list={lateList} />
+                  </>
+                )}
+              </>
+            );
+          })()}
         </>
       ) : (
         <>
@@ -76,7 +90,7 @@ export default function EventSheet({ eventId, onClose }) {
             <div className="cover">
               <span className={cv.pitcher ? '' : 'lack'}>投手 {cv.pitcher} 人{cv.pitcher ? '' : '，還缺'}</span>
               <span className={cv.catcher ? '' : 'lack'}>捕手 {cv.catcher} 人{cv.catcher ? '' : '，還缺'}</span>
-              <span className={c.yes >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.yes} 人{c.yes >= MIN_PLAYERS ? '' : `，不到 ${MIN_PLAYERS} 人`}</span>
+              <span className={c.coming >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.coming} 人{c.late ? `（含遲到 ${c.late} 人）` : ''}{c.coming >= MIN_PLAYERS ? '' : `，不到 ${MIN_PLAYERS} 人`}</span>
             </div>
           )}
           {Object.keys(RSVP_LABEL).map((k) => {
