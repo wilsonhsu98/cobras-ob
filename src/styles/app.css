@@ -57,7 +57,8 @@ h2.page { font-size: 24px; font-weight: 900; margin: 6px 0 14px; }
 h3.sec { font-size: 18px; font-weight: 700; margin: 26px 0 10px; }
 
 /* ── splash / bind ── */
-.splash { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--ink-2); }
+/* 高度要扣掉 :root 的安全區 padding，不然有瀏海的手機會多出一截捲軸；dvh 是目前實際可見高度（工具列還在時也剛好），vh 是舊瀏覽器的備援 */
+.splash { min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--ink-2); }
 .splash img { max-width: 50vw; height: auto; }
 .bind-form { width: 100%; max-width: 320px; display: grid; gap: 10px; }
 .bind { max-width: 640px; margin: 0 auto; padding: 28px 16px 40px; text-align: center; }
