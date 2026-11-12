@@ -1,4 +1,4 @@
-import { heldEvents } from '../lib/stats';
+import { attendanceByYear, heldEvents } from '../lib/stats';
 import { usePlayerRsvpYes } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import Avatar from './Avatar';
@@ -9,9 +9,7 @@ export default function PlayerSheet({ playerId, onClose, onEdit }) {
   const player = playerMap.get(playerId);
   const { data: yes } = usePlayerRsvpYes(playerId);
   if (!player) return null;
-  const held = heldEvents(events);
-  const heldIds = new Set(held.map((e) => e.id));
-  const attended = yes.filter((a) => heldIds.has(a.eventId)).length;
+  const byYear = attendanceByYear(heldEvents(events), new Set(yes.map((a) => a.eventId)));
 
   return (
     <Sheet label={player.nick} onClose={onClose}>
@@ -31,7 +29,12 @@ export default function PlayerSheet({ playerId, onClose, onEdit }) {
         <dt>職業</dt><dd>{player.job || '—'}</dd>
         <dt>支持球隊</dt><dd>{player.favoriteTeam || '—'}</dd>
         <dt>招牌絕技</dt><dd>{player.skill || '—'}</dd>
-        <dt>出席</dt><dd>已舉辦 {held.length} 場，會到 {attended} 次</dd>
+        <dt>出席</dt>
+        <dd>
+          {byYear.length
+            ? byYear.map((s) => <div key={s.year}>{s.year} {s.attended}/{s.held} ({s.pct}%)</div>)
+            : '—'}
+        </dd>
       </dl>
       {me?.id === player.id && (
         <button className="btn" style={{ marginTop: 14 }} onClick={onEdit}>編輯我的球員卡</button>
