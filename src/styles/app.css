@@ -147,6 +147,12 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 
 /* ── roster ── */
 .search { width: 100%; min-height: 50px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 14px; font-size: 17px; }
+/* 搜尋框：關掉瀏覽器內建的 ×，改用 SearchBox 自己畫的清除鈕（有字才出現）；右邊先留位置，字多了也不會被蓋到 */
+.search-box { position: relative; }
+.search-box .search { padding-right: 50px; }
+.search::-webkit-search-cancel-button, .search::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
+.search-clear { position: absolute; top: 50%; right: 3px; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; padding: 0; color: var(--surface); }
+.search-clear span { width: 24px; height: 24px; border-radius: 50%; background: var(--ink-2); display: grid; place-items: center; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0 4px; } /* 放不下就換行，不要橫向捲動把最後一顆切掉 */
 .filters button, .chips button { flex: none; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 15px; }
 .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }

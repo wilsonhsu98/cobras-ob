@@ -5,6 +5,7 @@ import { useTeamData } from '../hooks/useTeamData';
 import PlayerCard from '../components/PlayerCard';
 import PlayerSheet from '../components/PlayerSheet';
 import ProfileEditSheet from '../components/ProfileEditSheet';
+import SearchBox from '../components/SearchBox';
 
 const FILTERS = {
   全部: () => true,
@@ -38,7 +39,7 @@ export default function RosterPage() {
         </div>
       )}
 
-      <input className="search" type="search" placeholder="搜尋名字、綽號、背號或小孩" value={q} onChange={(e) => setQ(e.target.value)} aria-label="搜尋球員" />
+      <SearchBox value={q} onChange={setQ} placeholder="搜尋名字、綽號、背號或小孩" label="搜尋球員" />
       <div className="filters" role="group" aria-label="依位置篩選">
         {Object.keys(FILTERS).map((f) => (
           <button key={f} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f}</button>
