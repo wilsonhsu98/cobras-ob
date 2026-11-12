@@ -28,7 +28,11 @@
 
 - `.env.development` 只含 Emulator 設定，可以 commit。正式值放 Netlify 環境變數。
 - **原則：本機永遠不要寫入 prod 專案。** 需要看正式資料請用 Firebase Console。
-- seed 腳本寫入雲端時必須輸入專案 ID 確認。
+- seed 腳本寫入雲端時必須輸入專案 ID 確認，這一步由人本人輸入，不要用管線代填。
+- Firebase 專案：dev＝`cobras-ob-dev`、prod＝`cobras-ob-prod`（Firestore 都在 `asia-east1`）。服務帳戶金鑰放專案根目錄、已被 gitignore：`service-account.json`（dev）、`service-account-prod.json`（prod）。
+- **現況（2026-11-12）**：Netlify Production 已連 prod，LINE 登入與綁定在正式環境驗證通過；真實名單已匯入 prod。branch / preview 的環境變數是 dev 值，但還沒有對應的測試用 LIFF（見待辦）。
+- Netlify 的 Secrets scanning 會因為「變數值出現在 repo 檔案」讓 build 失敗（例如 README 裡寫了專案 ID）。公開的 `VITE_*` 值已用 `SECRETS_SCAN_OMIT_KEYS` 排除；不要關掉整個掃描，那會連服務帳戶金鑰與 `INVITE_CODE` 的保護一起關掉。
+- 改 `firestore.rules` 或索引之後，要分別部署到兩個專案：`firebase deploy --only firestore --project cobras-ob-prod`（dev 同理）。
 
 ## 資料結構（Firestore）
 
@@ -101,7 +105,8 @@ npm run build       # 正式建置
 
 ## 待辦（依優先順序）
 
-1. 實際串接 LINE（dev 專案 + 測試用 LIFF）並驗證綁定流程
-2. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
-3. 尾牙功能：年度出席統計頁、獎項名單
-4. 比賽紀錄（比數、MVP）、照片連結
+1. 上線：LINE channel 切成 Published、在管理頁建立真實活動與球具、在群組公告連結與邀請碼
+2. Netlify branch deploy 接 dev 專案，並建立測試用 LIFF（endpoint 填 branch 網址），讓新功能可以在雲端用真的 LINE 測試
+3. 分享到 LINE 改用 Flex Message 卡片（隊徽 + 回覆出席按鈕）
+4. 尾牙功能：年度出席統計頁、獎項名單
+5. 比賽紀錄（比數、MVP）、照片連結
