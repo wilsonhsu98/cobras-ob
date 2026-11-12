@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, matchPath, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const Icon = ({ d }) => (
@@ -29,10 +29,14 @@ const TABS = [
 
 export default function TabBar() {
   const { admin } = useAuth();
+  const { pathname } = useLocation();
   const tabs = TABS.filter((t) => !t.admin || admin);
+  // 橘色的標示條整列只有一條，換頁時用 CSS 轉場滑到目標那格（跟外觀切換的圓點同樣做法）；不在任何一格上就不顯示
+  const current = tabs.findIndex((t) => matchPath({ path: t.to, end: t.to === '/' }, pathname));
   return (
     <nav className="tabbar" aria-label="主選單">
-      <div className="in" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+      <div className="in" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)`, '--n': tabs.length, '--i': current }}>
+        {current >= 0 && <span className="bar" aria-hidden="true" />}
         {tabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.to === '/'}>
             <Icon d={t.icon} />{t.label}
