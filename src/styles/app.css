@@ -169,6 +169,8 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .pcard-lg .pband { height: 86px; }
 .pcard-lg .pband .num { font-size: 82px; }
 .pcard-lg .pnick { font-size: 24px; }
+.pcard-lg .avatar { left: 16px; bottom: -17px; width: 84px; height: 84px; font-size: 36px; border-width: 4px; } /* 球員視窗的頭像放大；距左、距上都是 16px（黑底高 83px = 16 + 84 − 17），下緣凸出黑底的部分由 .pbody 的上方留白讓出來 */
+.pcard-lg .pbody { padding: 26px 16px 14px; }
 
 /* ── gear ── */
 .notice { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; font-size: 15px; color: var(--ink-2); margin-bottom: 10px; }
