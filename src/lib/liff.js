@@ -57,6 +57,20 @@ export async function exchange({ bindPlayerId, inviteCode, silent = false } = {}
   return data;
 }
 
+/**
+ * 開外部網頁。在 LINE 內建瀏覽器裡改用系統瀏覽器開（Google 行事曆等網站在內建瀏覽器裡
+ * 常常登入不了或跳不到 App），其他情況就開新分頁。
+ */
+export function openExternal(url) {
+  try {
+    if (LIFF_ID && liff.isInClient()) {
+      liff.openWindow({ url, external: true });
+      return;
+    }
+  } catch { /* 取不到 LIFF 狀態就照一般方式開 */ }
+  window.open(url, '_blank', 'noopener');
+}
+
 /** 用 LINE 的分享選單把文字送到群組；回傳 'sent' | 'cancel' | 'unavailable' */
 export async function shareToLine(text) {
   if (!LIFF_ID) return 'unavailable';

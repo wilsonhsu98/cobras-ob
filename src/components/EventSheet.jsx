@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { EVENT_TYPE_LABEL, MIN_PLAYERS, RSVP_LABEL } from '../lib/constants';
+import { downloadIcs, googleCalendarUrl } from '../lib/calendar';
 import { dowLabel, isPastEvent, md } from '../lib/dates';
+import { liffUrl, openExternal } from '../lib/liff';
 import { countRsvp, coverage } from '../lib/stats';
 import { useAuth } from '../hooks/useAuth';
 import { useEventAttendance } from '../hooks/useEventAttendance';
@@ -52,6 +54,17 @@ export default function EventSheet({ eventId, onClose }) {
         <dt>球衣</dt><dd>{event.jersey || '—'}</dd>
         {event.note && <><dt>備註</dt><dd className="note">{event.note}</dd></>}
       </dl>
+
+      {!past && !rain && (
+        <>
+          <h3 className="sec">加到手機行事曆</h3>
+          <div className="cal-add">
+            <button className="btn small ghost" onClick={() => openExternal(googleCalendarUrl(event, liffUrl()))}>Google 行事曆</button>
+            <button className="btn small ghost" onClick={() => downloadIcs(event, liffUrl())}>iPhone／其他（.ics）</button>
+          </div>
+          <p className="hint">存進去是一份複本，之後改時間或雨天取消不會同步。</p>
+        </>
+      )}
 
       {past ? (
         <>

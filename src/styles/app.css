@@ -256,6 +256,8 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .check input { width: 22px; height: 22px; accent-color: var(--accent); }
 .err { color: var(--danger); font-weight: 700; font-size: 15px; margin: -4px 0 10px; }
 .hint { font-size: 13px; color: var(--ink-2); margin: 6px 0 0; }
+.cal-add { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cal-add .btn.small { width: 100%; min-height: 48px; padding: 6px 8px; }
 .mrow { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .mrow:last-child { border-bottom: 0; }
 .mrow .t { flex: 1; min-width: 10em; }
