@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ADMIN_ROLES, EVENT_TYPE, JERSEYS } from '../lib/constants';
-import { dowShort, isPastEvent, md } from '../lib/dates';
+import { dowShort, isPastEvent, md, todayISO } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
 import { USE_EMULATOR } from '../lib/firebase';
@@ -281,7 +281,12 @@ function PlayerAdmin() {
 function AttendanceRanking() {
   const { events, players } = useTeamData();
   const { data: yes } = useAllRsvpYes();
-  const heldIds = new Set(heldEvents(events).map((e) => e.id));
+  // 預設聚焦今年（今年還沒有已舉辦的活動也留在選項裡），也可以改選有活動的其他年份，或看全部累計
+  const thisYear = todayISO().slice(0, 4);
+  const [year, setYear] = useState(thisYear);
+  const held = heldEvents(events);
+  const years = [...new Set([thisYear, ...held.map((e) => e.date.slice(0, 4))])].sort().reverse();
+  const heldIds = new Set(held.filter((e) => year === 'all' || e.date.startsWith(year)).map((e) => e.id));
   const total = heldIds.size;
   const counts = new Map();
   for (const a of yes) if (heldIds.has(a.eventId)) counts.set(a.playerId, (counts.get(a.playerId) || 0) + 1);
@@ -289,10 +294,16 @@ function AttendanceRanking() {
 
   return (
     <>
-      <h3 className="sec">出席排行（會到／舉辦活動數）</h3>
+      <div className="sec-row">
+        <h3 className="sec">出席排行</h3>
+        <select value={year} onChange={(e) => setYear(e.target.value)} aria-label="選擇年份">
+          {years.map((y) => <option key={y} value={y}>{y} 年</option>)}
+          <option value="all">全部年份</option>
+        </select>
+      </div>
       <div className="card">
-        {total === 0 && <div className="hint">還沒有已舉辦的活動。</div>}
-        {total > 0 && <div className="hint" style={{ marginBottom: 8 }}>以回覆「會到」計算，因雨取消的活動不算。尾牙全勤獎參考。</div>}
+        {total === 0 && <div className="hint">{year === 'all' ? '還沒有已舉辦的活動。' : `${year} 年還沒有已舉辦的活動。`}</div>}
+        {total > 0 && <div className="hint" style={{ marginBottom: 8 }}>會到／舉辦活動數，以回覆「會到」計算，因雨取消的活動不算。尾牙全勤獎參考。</div>}
         {total > 0 && ranks.map((r, i) => (
           <div className="rank" key={r.p.id}>
             <span className="num">{i + 1}</span>

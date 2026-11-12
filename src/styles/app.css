@@ -251,6 +251,9 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 @keyframes up { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
 .sec-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 26px 0 10px; }
 .sec-row .sec { margin: 0; }
+/* 標題右邊的下拉單（例如出席排行的年份）：樣式跟表單的下拉單一致，只是比較小 */
+.sec-row select { -webkit-appearance: none; appearance: none; flex: none; height: 40px; border: 1.5px solid var(--line); border-radius: 12px; background-color: var(--surface); padding: 6px 34px 6px 12px; font-size: 16px; font-weight: 700; background-repeat: no-repeat; background-position: right 11px center; background-size: 14px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23857b70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 /* 全螢幕版（出席名冊）：蓋滿整個畫面，頂端列固定住，內容最寬 640px 置中 */
 .overlay.full { align-items: stretch; background: var(--bg); }
 .sheet.full { --pad: max(18px, calc((100vw - 640px) / 2)); max-width: none; max-height: none; height: 100%; border-radius: 0; padding: 0 var(--pad) calc(32px + env(safe-area-inset-bottom, 0px)); animation: none; }
