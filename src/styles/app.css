@@ -11,6 +11,7 @@ body {
   font-size: 17px; line-height: 1.55; -webkit-text-size-adjust: 100%;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--head); }
+[hidden] { display: none !important; } /* 不然 .field input 的 display: block 會把 hidden 蓋掉（例如選照片的檔案輸入框） */
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; }
