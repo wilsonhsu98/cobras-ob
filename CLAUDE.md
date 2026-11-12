@@ -71,7 +71,9 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 ## 設計規範
 
 - 配色取自隊徽：黑（標題列、計分板）、橘（主色）、米白。token 在 `src/styles/tokens.css`。
-- **畫面固定深色**，不跟手機的深淺模式：`index.html` 的 `<html>` 有 `data-theme="dark"`。原因是 LINE 內建瀏覽器是否跟著系統外觀不確定，手機是淺色時會看到沒調整過的淺色畫面。淺色色票仍保留在 `tokens.css`，要恢復或做切換時改這個屬性即可。調深色配色時，`@media (prefers-color-scheme: dark)` 區塊與 `:root[data-theme="dark"]` 兩處的值要一起改。若發現在球場陽光下反光難讀，再回頭考慮自動或切換。
+- **外觀預設深色，標題列右上角有三段切換**（淺色／自動／深色，`src/components/ThemeToggle.jsx`，樣式抄自 riversidesoftballclub.netlify.app 的做法）。偏好存在 localStorage（`cobras:theme`，`src/lib/theme.js`），套用方式是設定 `<html data-theme="light|auto|dark">`；`index.html` 有一小段內嵌 script 在畫面出現前先套用，避免閃一下，key 與預設值要跟 `theme.js` 一致。**沒選過就是深色、不是自動**：LINE 內建瀏覽器是否跟著系統外觀不確定，預設跟隨的話手機是淺色時會讓全隊突然看到淺色畫面。「自動」才跟手機（`prefers-color-scheme`）。調配色時，`tokens.css` 裡 `@media (prefers-color-scheme: dark)` 區塊與 `:root[data-theme="dark"]` 兩處的值要一起改。若發現在球場陽光下反光難讀，淺色模式隨時可以自己切。
+- 切換鈕在標題列（永遠黑底），所以它的顏色寫死、不跟著主題變；本機的「切換身分」按鈕放在「本機測試資料」那條，才不會擠到標題列。
+- 分頁圖示：賽程＝月曆、點將錄＝名片、球具＝交叉球棒加棒球、管理＝齒輪（`TabBar.jsx`）。球棒的線稿取自 IconOven（MIT）。
 - 首頁主角是「計分板」：黑底、橘色發光數字，顯示下一場日期、是否照常、出席人數。其他元件保持安靜。
 - 大字（基準 17px）、大按鈕（最小約 48px 高），使用者是中年爸爸、常在戶外陽光下操作。
 - 管理頁的列表（活動、球具、球員）每列只放一顆「更多」（`RowMenu`），所有動作在點開的底部視窗裡；危險動作（刪除）放最後、用紅色，刪除前仍有確認。不要在列裡並排多顆按鈕或下拉單，手機放不下會掉行。需要在列上看到的狀態（例如雨天取消）用標籤顯示。

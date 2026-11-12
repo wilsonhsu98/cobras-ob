@@ -10,6 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
     <title>CobrasOB</title>
+    <!-- 外觀偏好（淺色／自動／深色）在畫面出現前先套用，避免閃一下；key 與預設值要跟 src/lib/theme.js 一致 -->
+    <script>
+      try {
+        var t = localStorage.getItem('cobras:theme');
+        document.documentElement.dataset.theme = t === 'light' || t === 'auto' ? t : 'dark';
+      } catch (e) { /* 維持上面 <html> 寫的 dark */ }
+    </script>
   </head>
   <body>
     <div id="root"></div>
