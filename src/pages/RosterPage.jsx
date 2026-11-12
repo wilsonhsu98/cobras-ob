@@ -25,7 +25,7 @@ export default function RosterPage() {
   const keyword = q.trim();
   const list = players
     .filter(FILTERS[filter])
-    .filter((p) => !keyword || `${p.name}${p.nick}${p.number ?? ''}${p.kid}`.includes(keyword));
+    .filter((p) => !keyword || `${p.name}${p.nick}${p.number ?? ''}${p.relation ?? ''}`.includes(keyword));
   const done = players.filter(profileComplete).length;
 
   return (
@@ -39,7 +39,7 @@ export default function RosterPage() {
         </div>
       )}
 
-      <SearchBox value={q} onChange={setQ} placeholder="搜尋名字、綽號、背號或小孩" label="搜尋球員" />
+      <SearchBox value={q} onChange={setQ} placeholder="搜尋名字、綽號、背號或關係" label="搜尋球員" />
       <div className="filters" role="group" aria-label="依位置篩選">
         {Object.keys(FILTERS).map((f) => (
           <button key={f} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f}</button>

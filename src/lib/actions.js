@@ -56,7 +56,7 @@ export const updateMyProfile = (playerId, data) =>
 export const addPlayer = ({ name, nick, number }) =>
   addDoc(collection(db, COL.players), {
     name, nick: nick || name, number: number === '' || number == null ? null : Number(number),
-    isAdmin: false, role: '', positions: [], batsThrows: '', kid: '', experience: '', skill: '', job: '', favoriteTeam: '',
+    isAdmin: false, role: '', positions: [], batsThrows: '', relation: '', experience: '', skill: '', job: '', favoriteTeam: '',
     bound: false, createdAt: serverTimestamp(),
   });
 

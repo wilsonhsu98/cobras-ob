@@ -82,7 +82,7 @@ function toPlayer(row) {
     favoriteTeam: row.favoriteTeam || '',
     positions: row.positions ? row.positions.split(/[\/、]/).map((s) => s.trim()).filter(Boolean) : [],
     batsThrows: row.batsThrows || '',
-    kid: row.kid || '',
+    relation: row.relation || '',
     experience: row.experience || '',
     skill: row.skill || '',
     bound: false,

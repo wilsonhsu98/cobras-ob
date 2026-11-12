@@ -21,10 +21,10 @@ export default function PlayerSheet({ playerId, onClose, onEdit }) {
           {player.role && <span className="tag role">{player.role}</span>}
         </div>
       </div>
-      <dl className="kv" style={{ marginTop: 12 }}>
+      <dl className="kv wide" style={{ marginTop: 12 }}>
         <dt>守備位置</dt><dd>{player.positions?.join('、') || '—'}</dd>
         <dt>投打</dt><dd>{player.batsThrows || '—'}</dd>
-        <dt>小孩</dt><dd>{player.kid || '—'}</dd>
+        <dt>與眼鏡蛇的關係</dt><dd>{player.relation || '—'}</dd>
         <dt>棒球經歷</dt><dd>{player.experience || '—'}</dd>
         <dt>職業</dt><dd>{player.job || '—'}</dd>
         <dt>支持球隊</dt><dd>{player.favoriteTeam || '—'}</dd>

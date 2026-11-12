@@ -284,6 +284,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .x { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 20px; }
 .sheet h2 { font-size: 23px; margin: 8px 0 12px; }
 .kv { display: grid; grid-template-columns: 4.5em 1fr; gap: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 0; }
+.kv.wide { grid-template-columns: 6.5em 1fr; }
 .kv dt { color: var(--ink-2); font-size: 15px; }
 .kv dd { margin: 0; font-weight: 500; }
 .kv a { color: var(--accent-text); font-weight: 700; }

@@ -16,7 +16,7 @@ export default function ProfileEditSheet({ onClose }) {
     experience: me.experience || '',
     job: me.job || '',
     favoriteTeam: me.favoriteTeam || '',
-    kid: me.kid || '',
+    relation: me.relation || '',
     skill: me.skill || '',
   }));
   const [saving, setSaving] = useState(false);
@@ -34,7 +34,7 @@ export default function ProfileEditSheet({ onClose }) {
         ...form,
         nick: form.nick.trim(),
         number: n === '' ? null : Number(n),
-        kid: form.kid.trim(),
+        relation: form.relation.trim(),
         skill: form.skill.trim(),
         job: form.job.trim(),
         favoriteTeam: form.favoriteTeam.trim(),
@@ -95,9 +95,9 @@ export default function ProfileEditSheet({ onClose }) {
           <input id="pf-skill" value={form.skill} onChange={set('skill')} placeholder="例如：全隊最會帶飲料" />
         </div>
         <div className="field">
-          <label htmlFor="pf-kid">小孩（選填）</label>
-          <input id="pf-kid" value={form.kid} onChange={set('kid')} placeholder="例如：五年級、○○少棒" />
-          <p className="hint">只有隊員看得到。不寫全名也可以，不想填就留空。</p>
+          <label htmlFor="pf-relation">與眼鏡蛇的關係（選填）</label>
+          <input id="pf-relation" value={form.relation} onChange={set('relation')} placeholder="例如：小孩五年級、少棒校友" />
+          <p className="hint">只有隊員看得到。有小孩的話不用寫全名，不想填就留空。</p>
         </div>
         <button className="btn" onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存'}</button>
       </div>

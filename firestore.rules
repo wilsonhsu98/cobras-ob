@@ -20,7 +20,7 @@ service cloud.firestore {
       allow create, delete: if isAdmin();
       allow update: if isAdmin()
         || (member() && me() == playerId
-            && onlyChanged(['nick', 'number', 'positions', 'batsThrows', 'kid',
+            && onlyChanged(['nick', 'number', 'positions', 'batsThrows', 'relation',
                             'experience', 'skill', 'job', 'favoriteTeam', 'updatedAt']));
     }
 

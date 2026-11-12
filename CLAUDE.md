@@ -34,7 +34,7 @@
 
 ```
 players/{playerId}            name, nick, number, isAdmin, role, positions[], batsThrows,
-                              kid, experience, skill, job, favoriteTeam, bound, pictureUrl
+                              relation, experience, skill, job, favoriteTeam, bound, pictureUrl
 events/{eventId}              date('YYYY-MM-DD'), dateKey(20261115), start, end,
                               type(practice|hardball|rubberball|softball|party), title, place, opponent, jersey,
                               status(on|rain), seriesId
@@ -85,7 +85,7 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 
 - 降低門檻優先：打開就自動登入，不要求填寫不必要的資料。
 - 上線前只需要基本名單（姓名、綽號、背號、管理職），其餘由本人在「編輯我的球員卡」補。
-- 小孩資料是選填，提示「只有隊員看得到、不必寫全名」。
+- 「與眼鏡蛇的關係」（`relation`）是選填的自由文字，例如「小孩五年級」「少棒校友」「朋友介紹」，由本人在「編輯我的球員卡」填寫；提示「只有隊員看得到、有小孩不必寫全名」。原本欄位叫 `kid`（小孩），但不是每個人都因小孩而來，所以改名；prod 還沒匯入名單時改最省事，之後再改就要寫遷移。球員視窗的標籤較長，所以 `.kv` 加 `wide` 變體放寬標籤欄。
 - 點將錄不放能力評分，避免程度落差造成尷尬。
 - 位置缺口（沒有投手、捕手、不到 9 人）要明顯提示。
 - 活動視窗（即將舉行的活動）的「出席名單」標題旁，**管理者**有「全螢幕名單」按鈕（`LineupSheet.jsx`）：蓋滿整個畫面，分「會到／不會到／尚未回覆」三區，每區兩欄（依背號由左到右、由上到下）列出背號、全名、守位，全名後面空一格接綽號（現場都叫綽號，對得上人）。背號用等寬字體，個位數改成全形數字（２），並放在固定寬度（兩個字寬）的格子裡置中，個位數和兩位數的中心線才對得齊（不另外載入 CJK 等寬字型）。用途是隊長到場後對照著填紙本的先發名單，所以字大、不放能力；一般隊員看不到這顆按鈕。`Sheet` 有 `full` 屬性可做全螢幕版，疊兩層視窗時 Esc 只關最上面那層。
