@@ -3,6 +3,7 @@ import { addBag, updateBag } from '../lib/actions';
 import { imageToDataUrl } from '../lib/image';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
+import CropSheet from './CropSheet';
 import Sheet from './Sheet';
 
 /** 新增或編輯球具袋（管理者）。bag 為 null 代表新增；photo 是目前已存的照片。 */
@@ -17,25 +18,28 @@ export default function BagSheet({ bag, photo, onClose }) {
   const [holderId, setHolderId] = useState(me.id);
   const [pic, setPic] = useState(photo || '');
   const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false); // 縮圖中
+  const [cropFile, setCropFile] = useState(null); // 選好、等著裁切的照片
   const [saving, setSaving] = useState(false);
 
   const setItem = (i, key) => (e) => setItems((arr) => arr.map((it, j) => (j === i ? { ...it, [key]: e.target.value } : it)));
   const removeItem = (i) => setItems((arr) => arr.filter((_, j) => j !== i));
 
-  async function pickPhoto(e) {
+  // 選完照片先開裁切視窗（比例同下面預覽的 4:3），讓人拖曳、縮放決定要哪一塊
+  function pickPhoto(e) {
     const file = e.target.files?.[0];
     e.target.value = ''; // 讓同一張照片可以再選一次
-    if (!file) return;
-    setBusy(true);
+    if (file) setCropFile(file);
+  }
+
+  // 失敗要丟出去，CropSheet 才會留著讓人再試
+  async function cropPhoto(area) {
     try {
-      setPic(await imageToDataUrl(file));
+      setPic(await imageToDataUrl(cropFile, area));
       setErr('');
     } catch (error) {
       console.error(error);
       toast('這張照片無法使用，請換一張');
-    } finally {
-      setBusy(false);
+      throw error;
     }
   }
 
@@ -80,10 +84,10 @@ export default function BagSheet({ bag, photo, onClose }) {
           {pic ? <img className="bag-photo" src={pic} alt="球具袋照片預覽" /> : <div className="bag-photo empty">還沒有照片</div>}
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickPhoto} />
           <div className="row2" style={{ marginTop: 8 }}>
-            <button type="button" className="btn small ghost" onClick={() => fileRef.current?.click()} disabled={busy}>
-              {busy ? '處理中…' : pic ? '換照片' : '選擇照片'}
+            <button type="button" className="btn small ghost" onClick={() => fileRef.current?.click()}>
+              {pic ? '換照片' : '選擇照片'}
             </button>
-            {pic && <button type="button" className="btn small ghost" onClick={() => setPic('')} disabled={busy}>移除照片</button>}
+            {pic && <button type="button" className="btn small ghost" onClick={() => setPic('')}>移除照片</button>}
           </div>
         </div>
 
@@ -109,8 +113,11 @@ export default function BagSheet({ bag, photo, onClose }) {
         )}
 
         {err && <div className="err">{err}</div>}
-        <button className="btn" onClick={submit} disabled={saving || busy}>{saving ? '儲存中…' : bag ? '儲存' : '新增球具'}</button>
+        <button className="btn" onClick={submit} disabled={saving}>{saving ? '儲存中…' : bag ? '儲存' : '新增球具'}</button>
       </div>
+      {cropFile && (
+        <CropSheet file={cropFile} title="調整照片" aspect={4 / 3} onConfirm={cropPhoto} onClose={() => setCropFile(null)} />
+      )}
     </Sheet>
   );
 }

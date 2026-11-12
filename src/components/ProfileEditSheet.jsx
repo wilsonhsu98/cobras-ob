@@ -7,6 +7,7 @@ import { exchange } from '../lib/liff';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
 import Avatar from './Avatar';
+import CropSheet from './CropSheet';
 import Sheet from './Sheet';
 
 export default function ProfileEditSheet({ onClose }) {
@@ -15,6 +16,7 @@ export default function ProfileEditSheet({ onClose }) {
   const fileRef = useRef(null);
   const hasCustom = photoMap.has(me.id);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [cropFile, setCropFile] = useState(null); // 選好、等著裁切的照片
   const [form, setForm] = useState(() => ({
     nick: me.nick || '',
     number: me.number ?? '',
@@ -32,28 +34,32 @@ export default function ProfileEditSheet({ onClose }) {
     ...f, positions: f.positions.includes(p) ? f.positions.filter((x) => x !== p) : [...f.positions, p],
   }));
 
-  // 頭像不跟下面的「儲存」綁在一起：選了就直接換，Avatar 會即時更新
-  async function pickPhoto(e) {
+  // 選完照片先開裁切視窗，讓人拖曳、縮放決定要哪一塊
+  function pickPhoto(e) {
     const file = e.target.files?.[0];
     e.target.value = ''; // 讓同一張照片可以再選一次
-    if (!file) return;
-    setPhotoBusy(true);
+    if (file) setCropFile(file);
+  }
+
+  // 頭像不跟下面的「儲存」綁在一起：裁好按確定就直接換，Avatar 會即時更新。
+  // 失敗要丟出去，CropSheet 才會留著讓人再試
+  async function saveAvatar(area) {
+    let url;
     try {
-      let url;
-      try {
-        url = await imageToAvatarDataUrl(file);
-      } catch (error) {
-        console.error(error);
-        return toast('這張照片無法使用，請換一張');
-      }
+      url = await imageToAvatarDataUrl(cropFile, area);
+    } catch (error) {
+      console.error(error);
+      toast('這張照片無法使用，請換一張');
+      throw error;
+    }
+    try {
       await setPlayerPhoto(me.id, url);
-      toast('頭像已更新');
     } catch (error) {
       console.error(error);
       toast('沒有存成功，請再試一次');
-    } finally {
-      setPhotoBusy(false);
+      throw error;
     }
+    toast('頭像已更新');
   }
 
   // 刪掉自己上傳的頭像就會退回 LINE 頭像；順便向 LINE 重新換一次 token，
@@ -106,7 +112,7 @@ export default function ProfileEditSheet({ onClose }) {
             <div className="avatar-actions">
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickPhoto} />
               <button type="button" className="btn small ghost" onClick={() => fileRef.current?.click()} disabled={photoBusy}>
-                {photoBusy ? '處理中…' : hasCustom ? '換頭像' : '上傳頭像'}
+                {hasCustom ? '換頭像' : '上傳頭像'}
               </button>
               {hasCustom && (
                 <button type="button" className="btn small ghost" onClick={useLineAvatar} disabled={photoBusy}>改回用 LINE 頭像</button>
@@ -168,6 +174,9 @@ export default function ProfileEditSheet({ onClose }) {
         </div>
         <button className="btn" onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存'}</button>
       </div>
+      {cropFile && (
+        <CropSheet file={cropFile} title="調整頭像" aspect={1} round onConfirm={saveAvatar} onClose={() => setCropFile(null)} />
+      )}
     </Sheet>
   );
 }

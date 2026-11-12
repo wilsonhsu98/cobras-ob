@@ -206,6 +206,11 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .holder b { font-size: 19px; }
 .bag .btn + .btn { margin-top: 8px; }
 .bag-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+/* 裁切照片視窗：黑底框（react-easy-crop 會把圖與裁切範圍鋪滿這個框），下面是縮放滑桿與按鈕 */
+.crop-box { position: relative; height: min(56vh, 360px); background: #000; border-radius: 12px; overflow: hidden; }
+.crop-zoom { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-weight: 700; font-size: 15px; color: var(--ink-2); }
+.crop-zoom input { flex: 1; min-width: 0; min-height: 44px; accent-color: var(--accent); }
+.crop-actions { margin-top: 14px; }
 .bag-photo.empty { display: grid; place-items: center; font-size: 14px; color: var(--ink-2); border: 1px dashed var(--line); }
 .item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .item-row .nm { flex: 1; min-width: 0; }

@@ -15,7 +15,8 @@
 - **LINE 登入用 custom token**：LIFF 取得 LINE ID token → Netlify Function `line-auth` 向 LINE verify API 驗證 → 查 `lineBindings` → firebase-admin 發 custom token（claims：`playerId`、`admin`）→ 前端 `signInWithCustomToken`。不用 Firebase OIDC provider（需付費升級，且在 LINE 內體驗較差）。
 - **Netlify** 放網頁與 Function。SPA 由 `netlify.toml` 的 redirect 處理。
 - 狀態管理只用 React context + Firestore `onSnapshot`（`src/hooks/useFirestore.js`），不另外引入狀態管理套件。
-- **圖片不用 Firebase Storage**（需升級 Blaze 並綁信用卡，且免費額度只限 us-central1／us-east1／us-west1 的 bucket）。球具照片在瀏覽器縮成 JPEG 資料網址（`src/lib/image.js`，約 25 萬字元以內），存在 Firestore 的 `bagPhotos`。之後若真的需要更多、更大的照片，再改成 Storage 存網址。球員頭像同樣做法（`imageToAvatarDataUrl`：中間裁正方形、縮成 160px），存在 `playerPhotos`。
+- **圖片不用 Firebase Storage**（需升級 Blaze 並綁信用卡，且免費額度只限 us-central1／us-east1／us-west1 的 bucket）。球具照片在瀏覽器縮成 JPEG 資料網址（`src/lib/image.js`，約 25 萬字元以內），存在 Firestore 的 `bagPhotos`。之後若真的需要更多、更大的照片，再改成 Storage 存網址。球員頭像同樣做法（`imageToAvatarDataUrl`：裁成正方形、縮成 160px），存在 `playerPhotos`。
+- **選完照片會先開裁切視窗**（`CropSheet.jsx`，用 `react-easy-crop`，釘死 6.2.4）：拖曳移動、兩指／滑桿／滾輪縮放；頭像是圓形框 1:1、球具照片是 4:3（跟列表上顯示的比例一致）。視窗只回傳原圖像素的裁切範圍 `{x, y, width, height}`，實際裁切與縮小仍在 `image.js`（兩個函式第二個參數 `area`，沒給就退回整張／中間裁正方形）。裁切視窗疊在編輯視窗上，所以 `Sheet` 有 `closeOnBackdrop={false}`：滑鼠拖曳到框外放開不能被當成點背景而誤關。
 - 不做主動推播（LINE Messaging API 推播到群組依人數計費）。公告用管理頁「複製文字」或 `liff.shareTargetPicker()`。
 
 ## 環境

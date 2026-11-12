@@ -13,8 +13,9 @@ function unlockScroll() {
   if (--lockCount === 0) document.body.style.overflow = savedOverflow;
 }
 
-/** 底部視窗。full 為全螢幕版（例如球員名冊），疊在其他視窗上時 Esc 只關最上面那層 */
-export default function Sheet({ label, onClose, head, full = false, children }) {
+/** 底部視窗。full 為全螢幕版（例如球員名冊），疊在其他視窗上時 Esc 只關最上面那層。
+ *  closeOnBackdrop=false 時點背景不關閉（裁切照片要拖曳，滑鼠拖出視窗外放開會被當成點背景） */
+export default function Sheet({ label, onClose, head, full = false, closeOnBackdrop = true, children }) {
   const overlay = useRef(null);
   const panel = useRef(null);
   const closeRef = useRef(onClose);
@@ -36,7 +37,7 @@ export default function Sheet({ label, onClose, head, full = false, children }) 
   }, []);
 
   return createPortal(
-    <div className={`overlay${full ? ' full' : ''}`} ref={overlay} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className={`overlay${full ? ' full' : ''}`} ref={overlay} onClick={(e) => { if (closeOnBackdrop && e.target === e.currentTarget) onClose(); }}>
       <div className={`sheet${full ? ' full' : ''}`} role="dialog" aria-modal="true" aria-label={label} ref={panel}>
         <div className="sheet-head">
           <div>{head}</div>
