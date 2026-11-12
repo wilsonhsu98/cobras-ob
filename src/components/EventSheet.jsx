@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { EVENT_TYPE_LABEL, MIN_PLAYERS, RSVP_LABEL } from '../lib/constants';
 import { dowLabel, isPastEvent, md } from '../lib/dates';
 import { countRsvp, coverage } from '../lib/stats';
+import { useAuth } from '../hooks/useAuth';
 import { useEventAttendance } from '../hooks/useEventAttendance';
 import { useTeamData } from '../hooks/useTeamData';
 import EventTitle from './EventTitle';
+import LineupSheet from './LineupSheet';
 import RsvpButtons from './RsvpButtons';
 import Sheet from './Sheet';
 
@@ -11,6 +14,8 @@ const mapUrl = (place) => `https://www.google.com/maps/search/?api=1&query=${enc
 
 export default function EventSheet({ eventId, onClose }) {
   const { events, players, me } = useTeamData();
+  const { admin } = useAuth();
+  const [lineupOpen, setLineupOpen] = useState(false);
   const event = events.find((e) => e.id === eventId);
   const { data: attendance } = useEventAttendance(eventId);
   if (!event) return null;
@@ -62,7 +67,10 @@ export default function EventSheet({ eventId, onClose }) {
             </>
           )}
 
-          <h3 className="sec">出席名單</h3>
+          <div className="sec-row">
+            <h3 className="sec">出席名單</h3>
+            {admin && <button className="btn small ghost" onClick={() => setLineupOpen(true)}>全螢幕名單</button>}
+          </div>
           {event.type !== 'party' && (
             <div className="cover">
               <span className={cv.pitcher ? '' : 'lack'}>投手 {cv.pitcher} 人{cv.pitcher ? '' : '，還缺'}</span>
@@ -91,6 +99,7 @@ export default function EventSheet({ eventId, onClose }) {
           })()}
         </>
       )}
+      {lineupOpen && <LineupSheet event={event} players={players} attendance={attendance} onClose={() => setLineupOpen(false)} />}
     </Sheet>
   );
 }
