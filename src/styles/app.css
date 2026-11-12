@@ -165,6 +165,10 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .pband .num { position: absolute; right: 10px; top: -4px; font-size: 58px; line-height: 1; }
 .avatar { position: absolute; left: 12px; bottom: -22px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 20px; color: #fff; border: 3px solid var(--surface); overflow: hidden; }
 .avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* 編輯球員卡裡的頭像預覽：圓形放在左邊，按鈕在右邊直排 */
+.avatar-edit { display: flex; align-items: center; gap: 14px; }
+.avatar-edit .avatar { position: static; border: 0; flex: none; }
+.avatar-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .pbody { padding: 28px 12px 12px; }
 .pnick { font-weight: 900; font-size: 18px; line-height: 1.25; }
 .pname { font-size: 14px; color: var(--ink-2); }

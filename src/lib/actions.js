@@ -64,16 +64,31 @@ export const addPlayer = ({ name, nick, number }) =>
 export const setPlayerRole = (playerId, role) =>
   updateDoc(doc(db, COL.players, playerId), { role, isAdmin: role !== '' });
 
+// ── 球員頭像 ──
+// 自己上傳的頭像放在 playerPhotos；刪掉就退回 LINE 頭像（players.pictureUrl，只有 line-auth 能寫）
+const playerPhotoRef = (playerId) => doc(db, COL.playerPhotos, playerId);
+
+export const setPlayerPhoto = (playerId, dataUrl) =>
+  setDoc(playerPhotoRef(playerId), { dataUrl, updatedAt: serverTimestamp() });
+
+export const removePlayerPhoto = (playerId) => deleteDoc(playerPhotoRef(playerId));
+
 export async function unbindPlayer(playerId) {
   const snap = await getDocs(query(collection(db, COL.lineBindings), where('playerId', '==', playerId)));
   const batch = writeBatch(db);
   snap.forEach((d) => batch.delete(d.ref));
-  // 這個位子可能換別人綁，舊的 LINE 頭像一起清掉
+  // 這個位子可能換別人綁，舊的 LINE 頭像與自己上傳的頭像一起清掉
   batch.update(doc(db, COL.players, playerId), { bound: false, pictureUrl: null });
+  batch.delete(playerPhotoRef(playerId));
   await batch.commit();
 }
 
-export const deletePlayer = (playerId) => deleteDoc(doc(db, COL.players, playerId));
+export async function deletePlayer(playerId) {
+  const batch = writeBatch(db);
+  batch.delete(doc(db, COL.players, playerId));
+  batch.delete(playerPhotoRef(playerId));
+  await batch.commit();
+}
 
 // ── 球具袋管理（管理者）──
 // photo：圖片資料網址；undefined 代表不動照片，null 代表移除

@@ -15,7 +15,7 @@
 - **LINE 登入用 custom token**：LIFF 取得 LINE ID token → Netlify Function `line-auth` 向 LINE verify API 驗證 → 查 `lineBindings` → firebase-admin 發 custom token（claims：`playerId`、`admin`）→ 前端 `signInWithCustomToken`。不用 Firebase OIDC provider（需付費升級，且在 LINE 內體驗較差）。
 - **Netlify** 放網頁與 Function。SPA 由 `netlify.toml` 的 redirect 處理。
 - 狀態管理只用 React context + Firestore `onSnapshot`（`src/hooks/useFirestore.js`），不另外引入狀態管理套件。
-- **圖片不用 Firebase Storage**（需升級 Blaze 並綁信用卡，且免費額度只限 us-central1／us-east1／us-west1 的 bucket）。球具照片在瀏覽器縮成 JPEG 資料網址（`src/lib/image.js`，約 25 萬字元以內），存在 Firestore 的 `bagPhotos`。之後若真的需要更多、更大的照片，再改成 Storage 存網址。
+- **圖片不用 Firebase Storage**（需升級 Blaze 並綁信用卡，且免費額度只限 us-central1／us-east1／us-west1 的 bucket）。球具照片在瀏覽器縮成 JPEG 資料網址（`src/lib/image.js`，約 25 萬字元以內），存在 Firestore 的 `bagPhotos`。之後若真的需要更多、更大的照片，再改成 Storage 存網址。球員頭像同樣做法（`imageToAvatarDataUrl`：中間裁正方形、縮成 160px），存在 `playerPhotos`。
 - 不做主動推播（LINE Messaging API 推播到群組依人數計費）。公告用管理頁「複製文字」或 `liff.shareTargetPicker()`。
 
 ## 環境
@@ -46,6 +46,7 @@ events/{eventId}/attendance/{playerId}
                               playerId, eventId, rsvp(yes|no|null), updatedAt
 bags/{bagId}                  name, items[{name,qty}], holderId
 bagPhotos/{bagId}             dataUrl, updatedAt   （球具照片，文件 ID 同 bagId；另放一個集合，只有球具頁與管理頁訂閱）
+playerPhotos/{playerId}       dataUrl, updatedAt   （球員自己上傳的頭像，文件 ID 同 playerId；160px 方形 JPEG，約 5～10KB）
 handoffs/{handoffId}          bagId, bagName, fromId, toId, byId, missing, createdAt   （保管紀錄，建立後不可改）
 lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function 寫入，管理者可讀、可刪）
 ```
@@ -68,7 +69,8 @@ lineBindings/{lineUserId}     playerId, lineName, boundAt   （只有 Function �
 
 - 已通過 LINE 驗證但尚未綁定的人只能讀 `players`（用來選自己）。
 - 球員只能改自己的出席紀錄（只有 `rsvp`）、自己的球員卡（不能改 `isAdmin`、`bound`、`pictureUrl`）。
-- `pictureUrl`（LINE 頭像網址）只有 `line-auth` Function 在登入時寫入，來源是 LINE ID token 的 `picture`；解除綁定時清掉。前端 Avatar 有頭像就顯示，沒有或載入失敗就退回姓氏。
+- `pictureUrl`（LINE 頭像網址）只有 `line-auth` Function 在登入時寫入，來源是 LINE ID token 的 `picture`；解除綁定時清掉。已綁定的人每次打開 app 都會在背景重新換 token，所以在 LINE 換頭像後重新打開就會更新（不是即時）。
+- 球員也可以在「編輯我的球員卡」自己上傳頭像（`playerPhotos`，只有本人能寫、`dataUrl` 不超過 8 萬字元；本人或管理者能刪）。Avatar 的優先順序：自己上傳的 → LINE 頭像 → 姓氏，其中一個載入失敗就換下一個。LINE 沒有開放 API 讓第三方改使用者的 LINE 頭像，所以**無法把自訂頭像同步回 LINE**；「改回用 LINE 頭像」鈕做的是刪掉自己上傳的那張，並呼叫一次 `exchange({ silent: true })` 讓 `line-auth` 把最新的 LINE 頭像寫回。`playerPhotos` 由 `TeamDataProvider` 訂閱一次（全隊約 30 張、各約 10KB），**不算進 loading／error**（頭像只是裝飾）。解除綁定、刪除球員時要一併刪掉 `playerPhotos`，免得換人綁同一個位子時還看到前一個人的照片。
 - 球具保管一步完成、沒有輪值：任何成員都能接手（只能把 `holderId` 改成自己，不需原保管人同意）；指定別人保管只有管理者。每次換手寫一筆 `handoffs`（`byId` 不等於 `toId` 代表是管理者指定）。
 - 球具新增、編輯（名稱、品項、照片）、刪除只有管理者，在「管理」頁的「球具管理」。`bagPhotos` 成員可讀、管理者可寫，rules 限制只有 `dataUrl`、`updatedAt` 兩個欄位且 `dataUrl` 不超過 40 萬字元。刪除球具時 `handoffs` 保留（上面記有當時的球具名稱）。
 - 改 rules 時請在 Emulator 實際操作驗證。

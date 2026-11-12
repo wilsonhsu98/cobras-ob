@@ -24,6 +24,18 @@ service cloud.firestore {
                             'experience', 'skill', 'job', 'favoriteTeam', 'updatedAt']));
     }
 
+    // 球員自己上傳的頭像：縮成小方圖的 JPEG 資料網址，另放一個集合（不放進 players，
+    // 因為 players 每個頁面都在訂閱）。文件 ID 就是 playerId；只有本人能寫，
+    // 本人或管理者能刪（解除綁定、刪除球員時要一併清掉）。沒有這份文件就顯示 LINE 頭像
+    match /playerPhotos/{playerId} {
+      allow read: if member();
+      allow create, update: if member() && me() == playerId
+        && request.resource.data.keys().hasOnly(['dataUrl', 'updatedAt'])
+        && request.resource.data.dataUrl is string
+        && request.resource.data.dataUrl.size() <= 80000;
+      allow delete: if isAdmin() || (member() && me() == playerId);
+    }
+
     // ── 活動與出席 ──
     match /events/{eventId} {
       allow read: if member();

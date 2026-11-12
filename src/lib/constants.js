@@ -1,6 +1,7 @@
 // 集合名稱與狀態值集中在這裡，避免各處打錯字
 export const COL = {
   players: 'players',
+  playerPhotos: 'playerPhotos',
   events: 'events',
   attendance: 'attendance',
   bags: 'bags',

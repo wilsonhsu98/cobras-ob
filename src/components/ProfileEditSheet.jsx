@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { BATS_THROWS, EXPERIENCE, POSITIONS } from '../lib/constants';
-import { updateMyProfile } from '../lib/actions';
+import { removePlayerPhoto, setPlayerPhoto, updateMyProfile } from '../lib/actions';
+import { USE_EMULATOR } from '../lib/firebase';
+import { imageToAvatarDataUrl } from '../lib/image';
+import { exchange } from '../lib/liff';
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
+import Avatar from './Avatar';
 import Sheet from './Sheet';
 
 export default function ProfileEditSheet({ onClose }) {
-  const { me } = useTeamData();
+  const { me, photoMap } = useTeamData();
   const toast = useToast();
+  const fileRef = useRef(null);
+  const hasCustom = photoMap.has(me.id);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [form, setForm] = useState(() => ({
     nick: me.nick || '',
     number: me.number ?? '',
@@ -24,6 +31,46 @@ export default function ProfileEditSheet({ onClose }) {
   const togglePos = (p) => setForm((f) => ({
     ...f, positions: f.positions.includes(p) ? f.positions.filter((x) => x !== p) : [...f.positions, p],
   }));
+
+  // 頭像不跟下面的「儲存」綁在一起：選了就直接換，Avatar 會即時更新
+  async function pickPhoto(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // 讓同一張照片可以再選一次
+    if (!file) return;
+    setPhotoBusy(true);
+    try {
+      let url;
+      try {
+        url = await imageToAvatarDataUrl(file);
+      } catch (error) {
+        console.error(error);
+        return toast('這張照片無法使用，請換一張');
+      }
+      await setPlayerPhoto(me.id, url);
+      toast('頭像已更新');
+    } catch (error) {
+      console.error(error);
+      toast('沒有存成功，請再試一次');
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  // 刪掉自己上傳的頭像就會退回 LINE 頭像；順便向 LINE 重新換一次 token，
+  // line-auth 會把 LINE 最新的頭像寫回來（不用等下次打開）
+  async function useLineAvatar() {
+    setPhotoBusy(true);
+    try {
+      await removePlayerPhoto(me.id);
+      toast('已改回 LINE 頭像');
+      if (!USE_EMULATOR) exchange({ silent: true }).catch(() => {});
+    } catch (error) {
+      console.error(error);
+      toast('沒有存成功，請再試一次');
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
 
   async function save() {
     if (!form.nick.trim()) return toast('綽號不能空白');
@@ -52,6 +99,26 @@ export default function ProfileEditSheet({ onClose }) {
     <Sheet label="編輯我的球員卡" onClose={onClose}>
       <h2>編輯我的球員卡</h2>
       <div className="card">
+        <div className="field">
+          <label>頭像</label>
+          <div className="avatar-edit">
+            <Avatar player={me} size={72} />
+            <div className="avatar-actions">
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickPhoto} />
+              <button type="button" className="btn small ghost" onClick={() => fileRef.current?.click()} disabled={photoBusy}>
+                {photoBusy ? '處理中…' : hasCustom ? '換頭像' : '上傳頭像'}
+              </button>
+              {hasCustom && (
+                <button type="button" className="btn small ghost" onClick={useLineAvatar} disabled={photoBusy}>改回用 LINE 頭像</button>
+              )}
+            </div>
+          </div>
+          <p className="hint">
+            {hasCustom ? '目前是你自己上傳的頭像。'
+              : me.pictureUrl ? '目前用 LINE 頭像，你在 LINE 換頭像後重新打開就會跟著更新。'
+                : '你的 LINE 沒有頭像，先顯示姓氏；上傳一張就會換掉。'}
+          </p>
+        </div>
         <div className="row2">
           <div className="field"><label htmlFor="pf-nick">綽號</label><input id="pf-nick" value={form.nick} onChange={set('nick')} /></div>
           <div className="field"><label htmlFor="pf-no">背號</label><input id="pf-no" inputMode="numeric" value={form.number} onChange={set('number')} /></div>
