@@ -5,6 +5,7 @@ import { TeamDataProvider, useTeamData } from './hooks/useTeamData';
 import { ToastProvider } from './hooks/useToast';
 import Header from './components/Header';
 import TabBar from './components/TabBar';
+import UpdateBanner from './components/UpdateBanner';
 import Splash from './components/Splash';
 import SchedulePage from './pages/SchedulePage';
 import RosterPage from './pages/RosterPage';
@@ -64,6 +65,7 @@ function Shell() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <UpdateBanner />
       <TabBar />
     </>
   );
