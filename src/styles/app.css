@@ -70,8 +70,9 @@ h3.sec { font-size: 18px; font-weight: 700; margin: 26px 0 10px; }
 .pick small { display: block; font-size: 13px; color: var(--ink-2); }
 
 /* ── scoreboard ── */
-.board { background: var(--board); color: var(--board-ink); border-radius: 16px; padding: 18px 18px 16px; border: 3px solid var(--board-edge);
+.board { display: block; width: 100%; text-align: left; background: var(--board); color: var(--board-ink); border-radius: 16px; padding: 18px 18px 16px; border: 3px solid var(--board-edge);
   background-image: radial-gradient(rgba(255,255,255,.055) 1px, transparent 1.6px); background-size: 7px 7px; }
+.board:active { filter: brightness(1.15); }
 .board-top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--board-dim); }
 .lamp { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--board-ink); font-size: 14px; }
 .lamp::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #3EDB75; box-shadow: 0 0 8px #3EDB75; }

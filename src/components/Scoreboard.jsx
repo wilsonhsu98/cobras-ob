@@ -14,7 +14,7 @@ export default function Scoreboard({ event, onOpen }) {
 
   return (
     <>
-      <section className={`board ${rain ? 'rain' : ''}`} aria-label="下一場活動">
+      <button type="button" className={`board ${rain ? 'rain' : ''}`} aria-label="下一場活動，點開看明細" onClick={() => onOpen(event.id)}>
         <div className="board-top">
           <span>下一場{EVENT_TYPE_LABEL[event.type]}</span>
           <span className={`lamp ${rain ? 'off' : ''}`}>{rain ? '雨天取消' : '照常舉行'}</span>
@@ -32,7 +32,7 @@ export default function Scoreboard({ event, onOpen }) {
           <div><span className="num">{c.no}</span><span>不會到</span></div>
           <div><span className="num">{c.none}</span><span>未回覆</span></div>
         </div>
-      </section>
+      </button>
       {me && (
         <div className="my-rsvp">
           <div className="my-rsvp-q">{me.nick}，你這次會到嗎？</div>
