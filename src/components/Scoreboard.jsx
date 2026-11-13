@@ -8,9 +8,12 @@ import RsvpButtons from './RsvpButtons';
 
 export default function Scoreboard({ event, onOpen }) {
   const { players, me, myAttendance } = useTeamData();
-  const { data: attendance } = useEventAttendance(event.id);
+  const { data: attendance, loading, fromCache, error } = useEventAttendance(event.id);
   const c = countRsvp(attendance, players.length);
   const rain = event.status === 'rain';
+  // 伺服器還沒確認（或讀取失敗）時顯示「–」。不能只看 loading：快取裡若已有別的 query 載入的
+  // 「我自己的那一筆」，Firestore 會立刻交出只含這一筆的部分結果（例如 0／0／1／37），再過一陣子才變成真的數字
+  const n = (v) => (loading || fromCache || error ? '–' : v);
 
   return (
     <>
@@ -27,10 +30,10 @@ export default function Scoreboard({ event, onOpen }) {
         <div className="board-title"><EventTitle event={event} /></div>
         <div className="board-place">{event.place}</div>
         <div className="board-cells">
-          <div><span className="num">{c.yes}</span><span>會到</span></div>
-          <div><span className="num">{c.late}</span><span>會遲到</span></div>
-          <div><span className="num">{c.no}</span><span>不會到</span></div>
-          <div><span className="num">{c.none}</span><span>未回覆</span></div>
+          <div><span className="num">{n(c.yes)}</span><span>會到</span></div>
+          <div><span className="num">{n(c.late)}</span><span>會遲到</span></div>
+          <div><span className="num">{n(c.no)}</span><span>不會到</span></div>
+          <div><span className="num">{n(c.none)}</span><span>未回覆</span></div>
         </div>
       </button>
       {me && (

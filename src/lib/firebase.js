@@ -1,6 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import {
+  getFirestore, initializeFirestore, connectFirestoreEmulator,
+  persistentLocalCache, persistentMultipleTabManager,
+} from 'firebase/firestore';
 
 const env = import.meta.env;
 
@@ -18,8 +21,19 @@ const app = initializeApp({
   appId: env.VITE_FIREBASE_APP_ID,
 });
 
+// 資料快取存在瀏覽器的 IndexedDB：重新打開 app 時，球員、活動、出席人數先用上次的資料立刻顯示，
+// 同時向伺服器要最新的，回來後自動更新（不然每次打開都要等連線建好、整批資料下載完才有畫面）。
+// IndexedDB 用不了（私密模式、被清掉等）時 SDK 會退回記憶體快取；已經初始化過（Vite 熱更新重跑這個檔）則沿用既有的實例。
+function createDb() {
+  try {
+    return initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+  } catch {
+    return getFirestore(app);
+  }
+}
+
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = createDb();
 
 if (USE_EMULATOR) {
   // 用同一個 hostname，手機連區網 IP 測試時也能連到電腦上的 Emulator
