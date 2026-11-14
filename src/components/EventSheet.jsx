@@ -103,7 +103,8 @@ export default function EventSheet({ eventId, onClose }) {
             <div className="cover">
               <span className={cv.pitcher ? '' : 'lack'}>投手 {cv.pitcher} 人{cv.pitcher ? '' : '，還缺'}</span>
               <span className={cv.catcher ? '' : 'lack'}>捕手 {cv.catcher} 人{cv.catcher ? '' : '，還缺'}</span>
-              <span className={c.coming >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.coming} 人{c.late ? `（含遲到 ${c.late} 人）` : ''}{c.coming >= MIN_PLAYERS ? '' : `，不到 ${MIN_PLAYERS} 人`}</span>
+              {/* 開賽人數只算「會到」：會遲到的人還沒到場，不能算進去，另外標在後面 */}
+              <span className={c.yes >= MIN_PLAYERS ? '' : 'lack'}>會到 {c.yes} 人{c.yes >= MIN_PLAYERS ? '' : `，還差 ${MIN_PLAYERS - c.yes} 人才夠開賽`}{c.late ? `（另有 ${c.late} 人會遲到）` : ''}</span>
             </div>
           )}
           {Object.keys(RSVP_LABEL).map((k) => {
