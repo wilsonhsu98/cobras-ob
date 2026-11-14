@@ -19,6 +19,8 @@ export default function App() {
       <AuthProvider>
         <Gate />
       </AuthProvider>
+      {/* 放在最外層：登入中、綁定、邀請碼、錯誤畫面也要收得到更新提示 */}
+      <UpdateBanner />
     </ToastProvider>
   );
 }
@@ -65,7 +67,6 @@ function Shell() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <UpdateBanner />
       <TabBar />
     </>
   );
