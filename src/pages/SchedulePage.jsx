@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { isPastEvent, parseISO } from '../lib/dates';
+import { hasEnded, isPastEvent, parseISO } from '../lib/dates';
 import { useTeamData } from '../hooks/useTeamData';
+import { useMinuteTick } from '../hooks/useMinuteTick';
 import Scoreboard from '../components/Scoreboard';
 import EventRow from '../components/EventRow';
 import EventSheet from '../components/EventSheet';
@@ -23,9 +24,13 @@ export default function SchedulePage() {
     try { localStorage.setItem(VIEW_KEY, v); } catch { /* ignore */ }
   }
 
+  useMinuteTick(); // 計分板要隨時間換場，不能只在操作時才重新計算
+
   const upcoming = events.filter((e) => !isPastEvent(e));
   const past = events.filter(isPastEvent).reverse();
-  const next = upcoming[0];
+  // 計分板：現在正在進行的這場；結束時間過了就換成之後最近的一場。
+  // 同一天有好幾場時，不能只拿「今天最早的」，那場可能早就打完了
+  const next = upcoming.find((e) => !hasEnded(e));
 
   let lastMonth = '';
   return (
