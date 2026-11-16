@@ -104,6 +104,13 @@ h3.sec { font-size: 18px; font-weight: 700; margin: 26px 0 10px; }
 .seg { display: inline-grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; margin: 22px 0 12px; }
 .seg button { border: 0; background: none; border-radius: 9px; padding: 8px 22px; font-weight: 700; color: var(--ink-2); }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+/* 管理頁的分段：整列撐滿、等寬，格數由 --n、目前這格由 --i 決定。橘色底塊整列只有一個（.thumb），
+   換組時用 left 轉場滑過去，跟下方頁籤的橘色標示條、外觀切換的圓點同樣做法；按鈕自己不再畫底色 */
+.seg.full { position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); margin: 4px 0 0; }
+.seg.full .thumb { position: absolute; top: 3px; bottom: 3px; left: calc(3px + (100% - 6px) / var(--n) * var(--i)); width: calc((100% - 6px) / var(--n)); border-radius: 9px; background: var(--accent); pointer-events: none; transition: left .3s ease; }
+.seg.full button { position: relative; min-height: 44px; padding: 8px 0; transition: color .3s ease; }
+.seg.full button[aria-pressed="true"] { background: none; }
+@media (prefers-reduced-motion: reduce) { .seg.full .thumb, .seg.full button { transition: none; } }
 
 /* ── event list ── */
 .month-label { font-weight: 900; font-size: 15px; color: var(--ink-2); margin: 18px 0 8px; }
@@ -286,6 +293,7 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 @keyframes up { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
 .sec-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 26px 0 10px; }
 .sec-row .sec { margin: 0; }
+.sec-row .btn.small { flex: none; }
 /* 標題右邊的下拉單（例如出席排行的年份）：樣式跟表單的下拉單一致，只是比較小 */
 .sec-row select { -webkit-appearance: none; appearance: none; flex: none; height: 40px; border: 1.5px solid var(--line); border-radius: 12px; background-color: var(--surface); padding: 6px 34px 6px 12px; font-size: 16px; font-weight: 700; background-repeat: no-repeat; background-position: right 11px center; background-size: 14px 14px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23857b70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }

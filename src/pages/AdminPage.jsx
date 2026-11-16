@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ADMIN_ROLES, ATTEND_WEIGHT, DEFAULT_JERSEY, EVENT_TYPE } from '../lib/constants';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ADMIN_ROLES, ATTEND_WEIGHT } from '../lib/constants';
 import { dowShort, isPastEvent, md, todayISO } from '../lib/dates';
 import { buildAnnouncement } from '../lib/announcement';
 import { liffUrl, shareToLine } from '../lib/liff';
 import { USE_EMULATOR } from '../lib/firebase';
 import {
-  addPlayer, createEvents, deleteBag, deleteEvent, deletePlayer, setEventStatus, setPlayerRole, unbindPlayer,
+  deleteBag, deleteEvent, deletePlayer, setEventStatus, setPlayerRole, unbindPlayer,
 } from '../lib/actions';
 import { useAuth } from '../hooks/useAuth';
 import { useBagPhotos } from '../hooks/useBagPhotos';
@@ -14,24 +14,53 @@ import { useAllAttended, useEventAttendance } from '../hooks/useEventAttendance'
 import { useTeamData } from '../hooks/useTeamData';
 import { useToast } from '../hooks/useToast';
 import BagSheet from '../components/BagSheet';
+import EventCreateSheet from '../components/EventCreateSheet';
 import EventEditSheet from '../components/EventEditSheet';
+import PlayerAddSheet from '../components/PlayerAddSheet';
 import RowMenu from '../components/RowMenu';
-import EventFields, { validateEvent } from '../components/EventFields';
+import SearchBox from '../components/SearchBox';
+
+// 管理頁分成四組、一次只顯示一組，不然一整串太長。最常用的（活動、公告）放第一組
+const TABS = [
+  { key: 'events', label: '活動' },
+  { key: 'gear', label: '球具' },
+  { key: 'players', label: '球員' },
+  { key: 'rank', label: '排行' },
+];
+const TAB_KEY = 'cobras:admin-tab';
+
+// 記在 sessionStorage：切到別的頁籤再回來、或重新載入（例如更新版本）都還停在原本那一組；
+// 重開 app 就回到第一組。讀寫都包 try/catch，用不了時就當作沒有
+function loadTab() {
+  try {
+    const v = sessionStorage.getItem(TAB_KEY);
+    return TABS.some((t) => t.key === v) ? v : TABS[0].key;
+  } catch { return TABS[0].key; }
+}
 
 export default function AdminPage() {
   const { admin } = useAuth();
+  const [tab, setTab] = useState(loadTab);
   if (!admin) {
     return <><h2 className="page">管理</h2><div className="notice">這一頁只有管理者可以使用。</div></>;
   }
+  const pick = (key) => {
+    setTab(key);
+    try { sessionStorage.setItem(TAB_KEY, key); } catch { /* 用不了就算了 */ }
+  };
   return (
     <>
       <h2 className="page">管理</h2>
-      <NewEventForm />
-      <EventStatusList />
-      <AnnouncementCard />
-      <BagAdmin />
-      <PlayerAdmin />
-      <AttendanceRanking />
+      <div className="seg full" style={{ '--n': TABS.length, '--i': TABS.findIndex((t) => t.key === tab) }} role="group" aria-label="管理項目">
+        <span className="thumb" aria-hidden="true" />
+        {TABS.map((t) => (
+          <button key={t.key} aria-pressed={tab === t.key} onClick={() => pick(t.key)}>{t.label}</button>
+        ))}
+      </div>
+      {tab === 'events' && <><EventStatusList /><AnnouncementCard /></>}
+      {tab === 'gear' && <BagAdmin />}
+      {tab === 'players' && <PlayerAdmin />}
+      {tab === 'rank' && <AttendanceRanking />}
     </>
   );
 }
@@ -43,45 +72,19 @@ function useRunner() {
   };
 }
 
-function NewEventForm() {
-  const run = useRunner();
-  const [f, setF] = useState({
-    type: EVENT_TYPE.practice, date: '', title: '週日練球', start: '14:00', end: '17:00',
-    place: '社區國小棒球場', opponent: '', jersey: DEFAULT_JERSEY, note: '', repeat: false,
-  });
-  const [err, setErr] = useState('');
-  const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
-
-  async function submit() {
-    const problem = validateEvent(f);
-    if (problem) return setErr(problem);
-    setErr('');
-    const { repeat, ...base } = f;
-    const n = repeat ? 4 : 1;
-    await run(() => createEvents({ ...base, title: base.title.trim(), place: base.place.trim(), opponent: base.opponent.trim(), note: base.note.trim() }, n), `已新增 ${n} 場活動`);
-  }
-
-  return (
-    <>
-      <h3 className="sec">新增活動</h3>
-      <div className="card">
-        <EventFields f={f} set={set} idPrefix="ne" />
-        <label className="check"><input type="checkbox" checked={f.repeat} onChange={set('repeat')} /> 每週同一天重複，共 4 週</label>
-        {err && <div className="err">{err}</div>}
-        <button className="btn" onClick={submit}>新增活動</button>
-      </div>
-    </>
-  );
-}
-
 function EventStatusList() {
   const { events } = useTeamData();
   const run = useRunner();
   const [editing, setEditing] = useState(null); // 正在編輯的活動
+  const [creating, setCreating] = useState(false);
+  const lastNew = useRef(null); // 上一次新增送出的欄位，下次開視窗帶回去
   const upcoming = events.filter((e) => !isPastEvent(e));
   return (
     <>
-      <h3 className="sec">活動狀態</h3>
+      <div className="sec-row">
+        <h3 className="sec">活動狀態</h3>
+        <button className="btn small" onClick={() => setCreating(true)}>＋ 新增活動</button>
+      </div>
       <div className="card">
         {upcoming.length === 0 && <div className="hint">沒有即將舉行的活動。</div>}
         {upcoming.map((e) => (
@@ -109,6 +112,7 @@ function EventStatusList() {
         ))}
       </div>
       {editing && <EventEditSheet event={editing} onClose={() => setEditing(null)} />}
+      {creating && <EventCreateSheet initial={lastNew.current} onCreated={(f) => { lastNew.current = f; }} onClose={() => setCreating(false)} />}
     </>
   );
 }
@@ -173,32 +177,32 @@ function BagAdmin() {
 
   return (
     <>
-      <h3 className="sec">球具管理</h3>
+      <div className="sec-row">
+        <h3 className="sec">球具管理</h3>
+        <button className="btn small" onClick={() => setSheet({ bag: null })}>＋ 新增球具</button>
+      </div>
       <div className="card">
-        <button className="btn" onClick={() => setSheet({ bag: null })}>新增球具</button>
-        <div style={{ marginTop: 8 }}>
-          {bags.map((b) => (
-            <div className="mrow" key={b.id}>
-              {photos.get(b.id) && <img className="bag-thumb" src={photos.get(b.id)} alt="" />}
-              <div className="t">
-                <b>{b.name}</b>
-                <div>{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}　保管：{nickOf(b.holderId)}</div>
-              </div>
-              <RowMenu
-                title={b.name}
-                actions={[
-                  { label: '編輯', onSelect: () => setSheet({ bag: b }) },
-                  {
-                    label: '刪除球具',
-                    danger: true,
-                    onSelect: () => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); },
-                  },
-                ]}
-              />
+        {bags.map((b) => (
+          <div className="mrow" key={b.id}>
+            {photos.get(b.id) && <img className="bag-thumb" src={photos.get(b.id)} alt="" />}
+            <div className="t">
+              <b>{b.name}</b>
+              <div>{b.items.map((i) => `${i.name} ${i.qty}`).join('，')}　保管：{nickOf(b.holderId)}</div>
             </div>
-          ))}
-          {bags.length === 0 && <div className="hint">還沒有球具。</div>}
-        </div>
+            <RowMenu
+              title={b.name}
+              actions={[
+                { label: '編輯', onSelect: () => setSheet({ bag: b }) },
+                {
+                  label: '刪除球具',
+                  danger: true,
+                  onSelect: () => { if (confirm(`確定刪除「${b.name}」？保管紀錄會保留。`)) run(() => deleteBag(b.id), `已刪除${b.name}`); },
+                },
+              ]}
+            />
+          </div>
+        ))}
+        {bags.length === 0 && <div className="hint">還沒有球具。</div>}
       </div>
       {sheet && (
         <BagSheet bag={sheet.bag} photo={sheet.bag ? photos.get(sheet.bag.id) : undefined} onClose={() => setSheet(null)} />
@@ -207,36 +211,46 @@ function BagAdmin() {
   );
 }
 
+const PLAYER_FILTERS = {
+  全部: () => true,
+  尚未綁定: (p) => !p.bound,
+  管理者: (p) => p.isAdmin || !!p.role,
+};
+
 function PlayerAdmin() {
   const { players } = useTeamData();
   const { playerId: myId } = useAuth();
   const run = useRunner();
-  const [form, setForm] = useState({ name: '', nick: '', number: '' });
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  async function add() {
-    if (!form.name.trim()) return;
-    const ok = await run(() => addPlayer({ name: form.name.trim(), nick: form.nick.trim(), number: form.number.trim() }), `已新增 ${form.nick || form.name}`);
-    if (ok) setForm({ name: '', nick: '', number: '' });
-  }
+  const [adding, setAdding] = useState(false);
+  const [q, setQ] = useState('');
+  const [filter, setFilter] = useState('全部');
 
   const changeRole = (p, role) =>
     run(() => setPlayerRole(p.id, role), role ? `${p.nick} 已設為${role}` : `${p.nick} 已改為一般隊員`);
 
+  const keyword = q.trim();
+  const list = players
+    .filter(PLAYER_FILTERS[filter])
+    .filter((p) => !keyword || `${p.name}${p.nick}${p.number ?? ''}`.includes(keyword));
+  const unbound = players.filter(PLAYER_FILTERS['尚未綁定']).length;
+
   return (
     <>
-      <h3 className="sec">球員管理</h3>
-      <div className="card">
-        <div className="row3">
-          <div className="field"><label htmlFor="np-name">姓名</label><input id="np-name" value={form.name} onChange={set('name')} /></div>
-          <div className="field"><label htmlFor="np-nick">綽號</label><input id="np-nick" value={form.nick} onChange={set('nick')} /></div>
-          <div className="field"><label htmlFor="np-no">背號</label><input id="np-no" inputMode="numeric" value={form.number} onChange={set('number')} /></div>
-        </div>
-        <button className="btn" onClick={add} disabled={!form.name.trim()}>新增球員</button>
-        <p className="hint">新增後，對方打開網頁就能在名單中找到自己完成綁定。有管理職（{ADMIN_ROLES.join('、')}）的人就有管理權限，變更後對方重新打開網頁才會生效。</p>
+      <div className="sec-row">
+        <h3 className="sec">球員管理</h3>
+        <button className="btn small" onClick={() => setAdding(true)}>＋ 新增球員</button>
       </div>
-      <div className="card" style={{ marginTop: 10 }}>
-        {players.map((p) => (
+      <SearchBox value={q} onChange={setQ} placeholder="搜尋姓名、綽號或背號" label="搜尋球員" />
+      <div className="filters" role="group" aria-label="篩選球員">
+        {Object.keys(PLAYER_FILTERS).map((f) => (
+          <button key={f} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f}</button>
+        ))}
+      </div>
+      <div className="count-note">
+        {list.length === players.length ? `全隊 ${players.length} 位` : `符合 ${list.length} 位／全隊 ${players.length} 位`}　尚未綁定 {unbound} 位
+      </div>
+      <div className="card">
+        {list.map((p) => (
           <div className="mrow" key={p.id}>
             <div className="t"><b>{p.nick}</b><div>{p.name}　{p.bound ? '已綁定 LINE' : '尚未綁定'}{p.role ? `　${p.role}` : p.isAdmin ? '　管理者' : ''}</div></div>
             {(p.id !== myId || p.bound) && (
@@ -267,13 +281,16 @@ function PlayerAdmin() {
                         >{r || '一般隊員'}</button>
                       ))}
                     </div>
+                    <p className="hint">有管理職就有管理權限，變更後對方重新打開網頁才會生效。</p>
                   </div>
                 )}
               </RowMenu>
             )}
           </div>
         ))}
+        {list.length === 0 && <div className="hint">找不到符合的球員。</div>}
       </div>
+      {adding && <PlayerAddSheet onClose={() => setAdding(false)} />}
     </>
   );
 }
