@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { EVENT_TYPE_LABEL } from '../lib/constants';
 import { addDays, parseISO, toISO, todayISO } from '../lib/dates';
 
+// 上下個月的箭頭用 SVG 畫，不用「‹」「›」文字符號：字形在字型裡的位置偏下，按鈕再怎麼置中看起來都偏低
+const Chevron = ({ d }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
 // 這個月出現的週末（週六、週日）。已經過去的週不顯示（週日早於今天就算過去）
 function weekendRows(year, month, today) {
   // month 可能是 -1（一月的上個月）或 12，先交給 Date 換算成正確的年與月，後面的比對才不會對不上
@@ -58,9 +63,9 @@ export default function WeekendCalendar({ events, onOpen }) {
   return (
     <>
       <div className="mnav">
-        <button onClick={() => setMonth(new Date(y, m - 1, 1))} disabled={!canGoPrev} aria-label="上個月">‹</button>
+        <button onClick={() => setMonth(new Date(y, m - 1, 1))} disabled={!canGoPrev} aria-label="上個月"><Chevron d="M15 5l-7 7 7 7" /></button>
         <b>{y} 年 {m + 1} 月</b>
-        <button onClick={() => setMonth(new Date(y, m + 1, 1))} aria-label="下個月">›</button>
+        <button onClick={() => setMonth(new Date(y, m + 1, 1))} aria-label="下個月"><Chevron d="M9 5l7 7-7 7" /></button>
       </div>
       <div className="wk wk-head"><span>星期六</span><span>星期日</span></div>
       {rows.map(([s, u]) => (

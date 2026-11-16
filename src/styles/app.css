@@ -101,16 +101,17 @@ h3.sec { font-size: 18px; font-weight: 700; margin: 26px 0 10px; }
 .link-btn { background: none; border: 0; color: var(--accent-text); font-weight: 700; padding: 12px 0 2px; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── segmented ── */
-.seg { display: inline-grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; margin: 22px 0 12px; }
-.seg button { border: 0; background: none; border-radius: 9px; padding: 8px 22px; font-weight: 700; color: var(--ink-2); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
-/* 管理頁的分段：整列撐滿、等寬，格數由 --n、目前這格由 --i 決定。橘色底塊整列只有一個（.thumb），
-   換組時用 left 轉場滑過去，跟下方頁籤的橘色標示條、外觀切換的圓點同樣做法；按鈕自己不再畫底色 */
-.seg.full { position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); margin: 4px 0 0; }
-.seg.full .thumb { position: absolute; top: 3px; bottom: 3px; left: calc(3px + (100% - 6px) / var(--n) * var(--i)); width: calc((100% - 6px) / var(--n)); border-radius: 9px; background: var(--accent); pointer-events: none; transition: left .3s ease; }
-.seg.full button { position: relative; min-height: 44px; padding: 8px 0; transition: color .3s ease; }
-.seg.full button[aria-pressed="true"] { background: none; }
-@media (prefers-reduced-motion: reduce) { .seg.full .thumb, .seg.full button { transition: none; } }
+/* 分段切換（賽程的清單／週末月曆、管理頁的四組）：格數由 --n、目前這格由 --i 決定。
+   橘色底塊整列只有一個（.thumb），換格時用 left 轉場滑過去，跟下方頁籤的橘色標示條、
+   外觀切換的圓點同樣做法；按鈕自己不畫底色，只換文字顏色。要加分段時記得放 <span className="thumb" /> */
+.seg { position: relative; display: inline-grid; grid-template-columns: repeat(var(--n), 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; margin: 22px 0 12px; }
+.seg .thumb { position: absolute; top: 3px; bottom: 3px; left: calc(3px + (100% - 6px) / var(--n) * var(--i)); width: calc((100% - 6px) / var(--n)); border-radius: 9px; background: var(--accent); pointer-events: none; transition: left .3s ease; }
+.seg button { position: relative; border: 0; background: none; border-radius: 9px; padding: 8px 22px; font-weight: 700; color: var(--ink-2); transition: color .3s ease; }
+.seg button[aria-pressed="true"] { color: var(--on-accent); }
+/* 管理頁：整列撐滿、等寬 */
+.seg.full { display: grid; margin: 4px 0 0; }
+.seg.full button { min-height: 44px; padding: 8px 0; }
+@media (prefers-reduced-motion: reduce) { .seg .thumb, .seg button { transition: none; } }
 
 /* ── event list ── */
 .month-label { font-weight: 900; font-size: 15px; color: var(--ink-2); margin: 18px 0 8px; }
@@ -142,7 +143,8 @@ details.past summary { cursor: pointer; font-weight: 700; color: var(--ink-2); p
 .mnav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .mnav b { font-size: 19px; }
 .mnav button:disabled { opacity: .3; }
-.mnav button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 20px; }
+.mnav button { display: grid; place-items: center; padding: 0; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.mnav button svg { display: block; }
 .wk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .wk-head { font-size: 14px; font-weight: 700; color: var(--ink-2); text-align: center; }
 .wk-head span:last-child { color: var(--danger); }

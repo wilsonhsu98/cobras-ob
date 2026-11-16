@@ -39,7 +39,8 @@ export default function SchedulePage() {
         ? <Scoreboard event={next} onOpen={setOpenId} />
         : <div className="notice">目前沒有安排活動。管理者可以到「管理」新增。</div>}
 
-      <div className="seg" role="group" aria-label="顯示方式">
+      <div className="seg" style={{ '--n': 2, '--i': view === 'list' ? 0 : 1 }} role="group" aria-label="顯示方式">
+        <span className="thumb" aria-hidden="true" />
         <button aria-pressed={view === 'list'} onClick={() => changeView('list')}>清單</button>
         <button aria-pressed={view === 'grid'} onClick={() => changeView('grid')}>週末月曆</button>
       </div>
